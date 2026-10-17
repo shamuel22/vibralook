@@ -2,6 +2,8 @@
 
 **Versión 2 · 17-oct-2026 (añade A0, ilustración de bienvenida) · Fase 1 (UI/UX) · App móvil Expo (iOS y Android)**
 
+> **Estado (17-oct-2026): entregados e integrados A0–A8** (paquete `VIBRA_LOOK_ARTES_v01/`). WebP de producción en `assets/art/`, registrados en `ART_REGISTRY`; A8 integrado en `RibbonAccent`. Revisados en dispositivo contra los criterios de §3. Según `VIBRA_LOOK_ARTES_v01/documentacion/prompts.md`, las piezas se crearon con una herramienta de generación de imágenes; no contienen personas, texto ni marcas.
+
 Este documento lista **solo** los artes que la interfaz necesita hoy (DESIGN.md §0). Cada uno ya tiene en la app un *placeholder* con su identificador, su proporción final y el rótulo «Arte pendiente». Cuando llegue el archivo aprobado se integra sin rehacer el layout: se copia a `assets/art/` y se registra en `ART_REGISTRY` (`src/components/ArtPlaceholder.tsx`).
 
 Referencias de dirección: `img/VIBRA_LOOK_Branding_Kit.png`, `img/VIBRA_LOOK_UI_UX.png`, `img/VIBRA_LOOK_Proceso_Selfie.png`, `img/VIBRA_LOOK_Proceso_Looks.png`. Son solo referencia: no se recortan ni se reutilizan.

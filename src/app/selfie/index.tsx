@@ -131,7 +131,13 @@ export default function PrepareSelfieScreen() {
       }
     >
       <EditorialHeading title={t('selfie.prepare.title')} subtitle={t('selfie.prepare.subtitle')} />
-      <ArtPlaceholder id="vl_selfie_guia_encuadre_v01" aspectRatio={1} decorative style={styles.art} />
+      <ArtPlaceholder
+        id="vl_selfie_guia_encuadre_v01"
+        aspectRatio={1}
+        decorative
+        contentFit="contain"
+        style={styles.art}
+      />
       <View style={styles.tips}>
         {(
           [

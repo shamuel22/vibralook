@@ -1,14 +1,12 @@
 /**
- * RibbonAccent (DESIGN §2, §5, §6): translucent brand-gradient bands behind content.
- * Decorative only (hidden from screen readers), one per screen, away from reading areas.
- * Motion: slow 6px drift on an 8s cycle, UI thread, transform + opacity only.
- * Paused when reduced motion is on, the app is backgrounded, or the screen loses focus.
- *
- * These simple bands are allowed in code; the watercolor ribbon artwork
- * (`vl_cintas_pie_v01`) can replace them once delivered.
+ * RibbonAccent (DESIGN §2, §5, §6): the silk ribbon artwork (`vl_cintas_pie_v01`, A8) behind
+ * the footer. Decorative only (hidden from screen readers), one per screen; its top third is
+ * transparent so text can pass over it. Motion: slow 6px drift on an 8s cycle, UI thread,
+ * transform only. Paused when reduced motion is on, the app is backgrounded, or the screen
+ * loses focus.
  */
+import { Image } from 'expo-image';
 import { useIsFocused } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { AppState, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
@@ -22,7 +20,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors, motion, ribbon } from '@/theme';
+import { motion } from '@/theme';
+
+const RIBBONS = require('../../assets/art/vl_cintas_pie_v01.webp');
+/** Horizontal drift amplitude (DESIGN §6: 4–8px); the art bleeds this much past each edge. */
+const DRIFT = 6;
 
 export interface RibbonAccentProps {
   /** Where the bands sit; the component fills its parent edge-to-edge. */
@@ -75,17 +77,8 @@ export function RibbonAccent({ placement = 'bottom', height = 140, style }: Ribb
     return () => cancelAnimation(drift);
   }, [animate, drift]);
 
-  const a = useAnimatedStyle(() => ({
-    transform: [{ translateX: -6 + drift.get() * 12 }, { rotate: '-9deg' }],
-    opacity: 0.34 + drift.get() * 0.08,
-  }));
-  const b = useAnimatedStyle(() => ({
-    transform: [{ translateX: 5 - drift.get() * 10 }, { rotate: '5deg' }],
-    opacity: 0.46 - drift.get() * 0.08,
-  }));
-  const c = useAnimatedStyle(() => ({
-    transform: [{ translateX: -3 + drift.get() * 6 }, { rotate: '-3deg' }],
-    opacity: 0.3 + drift.get() * 0.06,
+  const driftStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -DRIFT / 2 + drift.get() * DRIFT }],
   }));
 
   return (
@@ -96,28 +89,11 @@ export function RibbonAccent({ placement = 'bottom', height = 140, style }: Ribb
       importantForAccessibility="no-hide-descendants"
       style={[styles.wrap, placement === 'bottom' ? styles.bottom : styles.top, { height }, style]}
     >
-      <Animated.View style={[styles.band, { height: height * 0.42, bottom: height * 0.28 }, a]}>
-        <LinearGradient
-          colors={[colors.orchid, colors.rose]}
-          start={ribbon.start}
-          end={ribbon.end}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
-      <Animated.View style={[styles.band, { height: height * 0.34, bottom: height * 0.04 }, b]}>
-        <LinearGradient
-          colors={ribbon.colors}
-          locations={ribbon.locations}
-          start={ribbon.start}
-          end={ribbon.end}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
-      <Animated.View style={[styles.band, { height: height * 0.22, bottom: -height * 0.06 }, c]}>
-        <LinearGradient
-          colors={[colors.rose, colors.coral]}
-          start={ribbon.start}
-          end={ribbon.end}
+      <Animated.View style={[styles.art, driftStyle]}>
+        <Image
+          source={RIBBONS}
+          contentFit="cover"
+          contentPosition={placement === 'bottom' ? 'bottom' : 'top'}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
@@ -129,5 +105,5 @@ const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, overflow: 'hidden' },
   bottom: { bottom: 0 },
   top: { top: 0 },
-  band: { position: 'absolute', left: '-25%', width: '150%', borderRadius: 999, overflow: 'hidden' },
+  art: { position: 'absolute', top: 0, bottom: 0, left: -DRIFT, right: -DRIFT },
 });

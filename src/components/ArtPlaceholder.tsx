@@ -25,8 +25,21 @@ export type ArtId =
   | 'vl_creacion_textura_declaracion_v01'
   | 'vl_cintas_pie_v01';
 
-/** Approved final files. Empty until the graphics team delivers (ARTES_REQUERIDOS.md). */
-const ART_REGISTRY: Partial<Record<ArtId, number>> = {};
+/**
+ * Approved final files (delivery `VIBRA_LOOK_ARTES_v01`, 17-oct-2026). A new version is a new
+ * file (`_v02`) and a new entry here — never overwrite a delivered file.
+ * `vl_cintas_pie_v01` is used directly by RibbonAccent, not through this component.
+ */
+const ART_REGISTRY: Partial<Record<ArtId, number>> = {
+  vl_onboarding_hero_v01: require('../../assets/art/vl_onboarding_hero_v01.webp'),
+  vl_intencion_escena_jazz_v01: require('../../assets/art/vl_intencion_escena_jazz_v01.webp'),
+  vl_intencion_escena_sakura_v01: require('../../assets/art/vl_intencion_escena_sakura_v01.webp'),
+  vl_intencion_escena_reunion_v01: require('../../assets/art/vl_intencion_escena_reunion_v01.webp'),
+  vl_selfie_guia_encuadre_v01: require('../../assets/art/vl_selfie_guia_encuadre_v01.webp'),
+  vl_creacion_textura_susurro_v01: require('../../assets/art/vl_creacion_textura_susurro_v01.webp'),
+  vl_creacion_textura_equilibrio_v01: require('../../assets/art/vl_creacion_textura_equilibrio_v01.webp'),
+  vl_creacion_textura_declaracion_v01: require('../../assets/art/vl_creacion_textura_declaracion_v01.webp'),
+};
 
 export interface ArtPlaceholderProps {
   id: ArtId;
@@ -58,7 +71,8 @@ export function ArtPlaceholder({
       <Image
         source={final}
         contentFit={contentFit}
-        style={[{ aspectRatio }, style as object]}
+        // Same frame as the placeholder (full width, rounded), so swapping in art never shifts layout.
+        style={[styles.final, { aspectRatio }, style as object]}
         accessible={!decorative}
         accessibilityElementsHidden={decorative}
         accessibilityLabel={decorative ? undefined : alt}
@@ -90,6 +104,7 @@ export function ArtPlaceholder({
 }
 
 const styles = StyleSheet.create({
+  final: { width: '100%', borderRadius: radius.md, overflow: 'hidden' },
   box: {
     width: '100%',
     borderRadius: radius.md,

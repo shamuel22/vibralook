@@ -11,7 +11,7 @@ import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated'
 import { AppText, ArtPlaceholder, InlineNotice, PrimaryButton, RibbonAccent, Screen } from '@/components';
 import { useT, type TKey } from '@/i18n';
 import { useOnboarding } from '@/state/onboarding';
-import { colors, easing, motion, radius, space } from '@/theme';
+import { colors, easing, layout, motion, space } from '@/theme';
 
 const SYMBOL = require('../../assets/brand/vl_symbol.png');
 const STEPS = [1, 2, 3] as const;
@@ -93,8 +93,9 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { width: '100%', alignItems: 'center' },
-  heroArt: { width: '82%', borderRadius: radius.lg },
+  // Full bleed: the ribbons run off the screen edge instead of stopping at the gutter.
+  hero: { marginHorizontal: -layout.gutter, alignItems: 'center' },
+  heroArt: { width: '100%', borderRadius: 0 },
   badge: {
     position: 'absolute',
     bottom: -space[6],

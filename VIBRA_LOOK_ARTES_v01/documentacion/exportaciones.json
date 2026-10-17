@@ -1,0 +1,182 @@
+[
+  {
+    "id": "A0",
+    "name": "vl_onboarding_hero_v01",
+    "master": [
+      2560,
+      3200
+    ],
+    "web": [
+      1280,
+      1600
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1122,
+      1402
+    ],
+    "webp_bytes": 220620,
+    "quality": 88,
+    "master_bytes": 6205489
+  },
+  {
+    "id": "A1",
+    "name": "vl_intencion_escena_jazz_v01",
+    "master": [
+      3200,
+      1800
+    ],
+    "web": [
+      1600,
+      900
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1672,
+      941
+    ],
+    "webp_bytes": 177814,
+    "quality": 70,
+    "master_bytes": 6959297
+  },
+  {
+    "id": "A2",
+    "name": "vl_intencion_escena_sakura_v01",
+    "master": [
+      3200,
+      1800
+    ],
+    "web": [
+      1600,
+      900
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1672,
+      941
+    ],
+    "webp_bytes": 173730,
+    "quality": 84,
+    "master_bytes": 6330796
+  },
+  {
+    "id": "A3",
+    "name": "vl_intencion_escena_reunion_v01",
+    "master": [
+      3200,
+      1800
+    ],
+    "web": [
+      1600,
+      900
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1672,
+      941
+    ],
+    "webp_bytes": 173390,
+    "quality": 92,
+    "master_bytes": 4650379
+  },
+  {
+    "id": "A4",
+    "name": "vl_selfie_guia_encuadre_v01",
+    "master": [
+      2400,
+      2400
+    ],
+    "web": [
+      1200,
+      1200
+    ],
+    "alpha": true,
+    "source_pixels": [
+      1254,
+      1254
+    ],
+    "webp_bytes": 102686,
+    "quality": 94,
+    "master_bytes": 1847888
+  },
+  {
+    "id": "A5",
+    "name": "vl_creacion_textura_susurro_v01",
+    "master": [
+      960,
+      960
+    ],
+    "web": [
+      480,
+      480
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1254,
+      1254
+    ],
+    "webp_bytes": 59112,
+    "quality": 90,
+    "master_bytes": 1842785
+  },
+  {
+    "id": "A6",
+    "name": "vl_creacion_textura_equilibrio_v01",
+    "master": [
+      960,
+      960
+    ],
+    "web": [
+      480,
+      480
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1254,
+      1254
+    ],
+    "webp_bytes": 58540,
+    "quality": 80,
+    "master_bytes": 2073948
+  },
+  {
+    "id": "A7",
+    "name": "vl_creacion_textura_declaracion_v01",
+    "master": [
+      960,
+      960
+    ],
+    "web": [
+      480,
+      480
+    ],
+    "alpha": false,
+    "source_pixels": [
+      1254,
+      1254
+    ],
+    "webp_bytes": 57104,
+    "quality": 78,
+    "master_bytes": 2093409
+  },
+  {
+    "id": "A8",
+    "name": "vl_cintas_pie_v01",
+    "master": [
+      2880,
+      960
+    ],
+    "web": [
+      1440,
+      480
+    ],
+    "alpha": true,
+    "source_pixels": [
+      2172,
+      724
+    ],
+    "webp_bytes": 36000,
+    "quality": 94,
+    "master_bytes": 1899605
+  }
+]
