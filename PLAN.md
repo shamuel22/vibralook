@@ -151,14 +151,54 @@ Luego:
 
 ---
 
-## 4. Fase 2 — Lógica (solo esbozo; se detallará al terminar la Fase 1)
+## 4. Fase 2 — Lógica (iniciada el 17-oct-2026)
 
-1. **Spike YouCam** (primero, obligatorio por el brief §7): credenciales, carga de selfie, un efecto por categoría (`eye_shadow`, `lip_color`, `blush`, `skin_smooth`=0), tiempos, errores y consumo de unidades → lista blanca de patrones.
-2. Backend (propuesta: Node/TypeScript, p. ej. Hono o Fastify): proxy seguro a YouCam, orquestación de 3 tareas, sondeo limitado, caché por selfie+receta, límites por sesión.
-3. Motor de traducción: LLM → JSON estricto → validación con esquema (zod) → reintento único → receta editorial de respaldo etiquetada.
-4. Compilador de looks determinista + validador de restricciones previo a consumir unidades.
-5. Sustituir la implementación `mock` de `src/services/` por la real; la UI no cambia.
-6. Distribución para jueces sin pago ni registro (a definir: build de Android instalable vía EAS y/o Expo Go), README en inglés, ruta de demo reproducible, pruebas con 5 personas.
+### 4.1 Spike YouCam — resultados verificados (17-oct-2026)
+
+Hecho con llamadas reales; costó 3 unidades (saldo 1.040 → 1.037). Imagen: muestra pública del propio proveedor, usada solo para la prueba.
+
+| Tema | Resultado |
+| --- | --- |
+| Autenticación | API v2.0: `Authorization: Bearer <API Key>`. La API Key es `CLAVE_SECRETA_GENERADA` (verificada: 400 `InvalidTaskId` con tarea falsa, frente a 401 `InvalidApiKey` con la otra). `CLAVE_SECRETA` (218 car.) no se necesita en v2.0. |
+| Base URL | `https://yce-api-01.makeupar.com` |
+| Subida privada | `POST /s2s/v2.0/file` `{files:[{content_type,file_name,file_size}]}` → `data.files[0].file_id` + `requests[0]` (`PUT` a URL prefirmada con los `headers` dados). Sin URLs públicas propias. |
+| Tarea | `POST /s2s/v2.0/task/makeup-vto` `{src_file_id, version:"1.0", effects:[…]}` → `data.task_id` |
+| Sondeo | `GET /s2s/v2.0/task/makeup-vto/{task_id}` → `data.task_status` `running → success \| error`; éxito: `data.results.url` (**objeto**, no array; URL válida 2 h). |
+| Tiempos | 5–11 s por tarea; dos tareas en paralelo sin problema. |
+| Reutilización | Un mismo `file_id` sirve para varias tareas (3 variantes + ediciones con una sola subida). |
+| Borrado | `POST /s2s/v2.0/task/delete {task_id}` borra la tarea **y sus archivos de entrada**: hacerlo al cerrar la sesión, nunca entre renders. |
+| Coste | 1 unidad por tarea (`GET /s2s/v2.0/credit/feature-cost`); errores no consumen. Saldo: `GET /s2s/v1.0/client/credit` (funciona con la misma API Key). |
+| Fidelidad | Encuadre, pose y rasgos idénticos; maquillaje realista. Con `skin_smooth` 0/0 se conserva la textura real de la piel. |
+| Límites de imagen | jpg/png, < 10 MB, lado largo < 1920 px, rostro ≥ 100 px, frontal. Errores de rostro: `error_face_position_*`, `error_face_angle_invalid`, `error_below_min_image_size`… |
+
+**Reglas de compilación fijadas (no alteran rasgos, DESIGN.md §1 y §9.3):** siempre `skin_smooth {0,0}`; `lip_color.shape = original`, `morphology {fullness:0, wrinkless:0}`, `style.type = full`. Nunca se usan `foundation`, `contour` ni formas de labio alternativas.
+
+**Lista blanca inicial** (se amplía solo tras probarla con rostros reales):
+- `eye_shadow`: patrones `1color1` (Susurro/Equilibrio) y `2colors1` (Declaración, segundo tono derivado más profundo). Acabados: mate → `matte`; satinado → `shimmer` con brillo bajo; metálico → `metallic`.
+- `blush`: patrón `1color1`. Acabados: mate → `matte`; satinado → `satin` (`glowStrength`); luminoso → `shimmer`.
+- `lip_color`: mate → `matte`; satinado → `satin`; brillo → `gloss` (`gloss`, `transparencyIntensity`).
+- Intensidad de zona 1–5 → `colorIntensity` 25/40/55/70/85 (a calibrar con fotos reales).
+
+### 4.2 Arquitectura
+
+- **API propia `vibralook-api`** (NestJS + TypeScript, pnpm): repositorio Git **independiente**, en la carpeta `./vibralook-api` (ignorada por el repo de la app). Despliegue `pnpm install && pnpm build && pnpm start`. La API Key de YouCam vive **solo** en el servidor.
+- **Sin base de datos al inicio**: las sesiones duran minutos y el brief pide no conservar imágenes; estado en memoria con TTL. PostgreSQL se añade solo si hace falta (registro de unidades o límites entre reinicios).
+- **Motor de traducción**: LLM (Claude) → JSON estricto → validación con esquema → un reintento → receta editorial prediseñada **etiquetada** como tal.
+- **Compilador de looks determinista**: `LookRecipe` → efectos YouCam de la lista blanca. Las restricciones se validan **antes** de gastar unidades.
+- **Privacidad**: la selfie se sube a YouCam por la API (subida privada); los resultados se descargan y se sirven a la app por la propia API con el token de sesión; al cerrar o expirar la sesión se borran las tareas en YouCam y la memoria.
+
+### 4.3 Etapas
+
+| Etapa | Contenido | Criterio de salida |
+| --- | --- | --- |
+| F2.0 Spike | ✅ Hecho (arriba). | — |
+| F2.1 Esqueleto API | NestJS, config validada (.env), `/health`, cliente YouCam (archivo, tarea, sondeo, borrado, saldo) con errores normalizados, logs sin datos personales. | Tests del cliente + 1 render real desde la API. |
+| F2.2 Contratos + compilador | Contratos compartidos con la app (receta, kit, restricciones, tonos) + compilador a efectos YouCam + validador de restricciones. | Tests: cada receta válida compila; ninguna inválida llega a YouCam. |
+| F2.3 Traducción | Cliente LLM, prompt, esquema, reintento, recetas editoriales de respaldo ES/EN, `describe` para ediciones. | Tests con las 3 vibras de ejemplo; JSON siempre válido o respaldo etiquetado. |
+| F2.4 Orquestación | Endpoints de sesión: crear, subir selfie (validación + errores de rostro), traducir, renders por variante/edición, estado, imagen, cerrar. Caché selfie+receta, límites por sesión. | Recorrido completo por HTTP con renders reales. |
+| F2.5 App | Implementación HTTP de `src/services/` (la UI no cambia), `EXPO_PUBLIC_API_URL`, mock conservado para desarrollo. Sello de simulación desaparece con resultados reales. | Recorrido completo en el emulador con YouCam real. |
+| F2.6 Endurecimiento + despliegue | Rate limit, limpieza de tareas, README en inglés, guía de despliegue en VPS (pnpm + systemd/PM2 + HTTPS). | API desplegada y accesible desde un teléfono real. |
+| F2.7 Demo y validación | Ruta de demo reproducible, build Android instalable, pruebas con 5 personas. | Entregables del brief §10. |
 
 ---
 
