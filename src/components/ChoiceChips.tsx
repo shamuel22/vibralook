@@ -60,7 +60,7 @@ export function ChoiceChips<T extends string | number>(props: ChoiceChipsProps<T
             disabled={o.disabled}
             onPress={() => props.onChange(o.value)}
             transitionColors
-            style={[styles.chip, active && styles.active, o.disabled && styles.disabled]}
+            style={[styles.chip, o.disabled && styles.disabled, active && styles.active, active && o.disabled && styles.activeDisabled]}
             pressedStyle={active ? styles.activePressed : styles.pressed}
           >
             <View style={styles.inner}>
@@ -92,7 +92,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   inner: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
-  active: { backgroundColor: colors.ink, borderColor: colors.ink },
+  active: { backgroundColor: colors.ink, borderColor: colors.ink, borderStyle: 'solid' },
+  activeDisabled: { opacity: 0.55 },
   pressed: { backgroundColor: colors.creamDeep },
   activePressed: { backgroundColor: colors.inkPressed },
   disabled: { backgroundColor: colors.cream, borderStyle: 'dashed', opacity: 0.7 },

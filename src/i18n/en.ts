@@ -200,6 +200,7 @@ const en: Dictionary = {
     after: 'After',
     showBefore: 'See before',
     hint: 'Slide to compare',
+    position: 'After {after}%, before {before}%.',
   },
   edit: {
     title: 'Make it yours',
@@ -226,6 +227,7 @@ const en: Dictionary = {
     undone: 'Back to the previous version.',
     renderError: 'We couldn’t apply the change. Your previous look is still here.',
     toResult: 'I’ll keep this look',
+    finishNotInKit: 'This finish isn’t in your kit for this shade.',
     listJoin: ' and ',
   },
   zonesLower: {
@@ -255,6 +257,9 @@ const en: Dictionary = {
       cheeks: 'Cheeks',
       finish: 'Final touch',
     },
+  },
+  dev: {
+    testImage: 'test image',
   },
   errors: {
     generic: 'Something went wrong. You can try again.',

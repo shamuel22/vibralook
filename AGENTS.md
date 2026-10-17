@@ -13,7 +13,8 @@ Read before writing any code in this repo. Applies to every agent (Claude, Codex
 - Expo SDK 58, Expo Router (routes in `src/app/`), TypeScript strict, React Compiler on.
 - Reanimated 4 + react-native-worklets, Gesture Handler, expo-image, expo-linear-gradient, expo-haptics.
 - Fonts: Fraunces (headings) and Manrope (UI), loaded in `src/app/_layout.tsx`.
-- Install packages only with `npx expo install <pkg>` and only when the lead approves.
+- Install packages only with `npx expo install <pkg>` and only when the lead approves. If it fails with `EALLOWSCRIPTS` (npm 11), install the version listed in `node_modules/expo/bundledNativeModules.json` with plain `npm install <pkg>@<version>`.
+- Reanimated CSS transitions: `transitionTimingFunction` takes `cssEasing.*` from `@/theme` (built with `cubicBezier()`); `'cubic-bezier(...)'` strings crash at runtime.
 
 ## Expo has changed — do not trust training data
 Before using an Expo / RN API, check the installed types in `node_modules` or the docs for **v58**: https://docs.expo.dev/versions/v58.0.0/ (index: https://docs.expo.dev/llms.txt).

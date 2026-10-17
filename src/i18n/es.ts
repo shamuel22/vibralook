@@ -199,6 +199,7 @@ const es = {
     after: 'Después',
     showBefore: 'Ver antes',
     hint: 'Desliza para comparar',
+    position: 'Después {after} %, antes {before} %.',
   },
   edit: {
     title: 'Hazlo tuyo',
@@ -225,6 +226,7 @@ const es = {
     undone: 'Volvimos a la versión anterior.',
     renderError: 'No pudimos aplicar el cambio. Tu look anterior sigue aquí.',
     toResult: 'Me quedo con este look',
+    finishNotInKit: 'Este acabado no está en tu kit para este tono.',
     listJoin: ' y ',
   },
   zonesLower: {
@@ -254,6 +256,9 @@ const es = {
       cheeks: 'Mejillas',
       finish: 'Toque final',
     },
+  },
+  dev: {
+    testImage: 'imagen de prueba',
   },
   errors: {
     generic: 'Algo no salió bien. Puedes intentarlo de nuevo.',
