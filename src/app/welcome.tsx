@@ -12,7 +12,7 @@ import { AppText, ArtPlaceholder, InlineNotice, PrimaryButton, RibbonAccent, Scr
 import { useT, type TKey } from '@/i18n';
 import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { useOnboarding } from '@/state/onboarding';
-import { colors, easing, layout, motion, radius, space } from '@/theme';
+import { colors, easing, fonts, layout, motion, space } from '@/theme';
 
 const SYMBOL = require('../../assets/brand/vl_symbol.png');
 const STEPS = [1, 2, 3] as const;
@@ -50,12 +50,10 @@ export default function WelcomeScreen() {
           autoplay={motionAllowed}
           style={styles.heroArt}
         />
-        {/* Honesty: this is an illustration, not a virtual try-on of the person using the app. */}
-        <View style={styles.caption} accessible accessibilityLabel={t('onboarding.illustrative')}>
-          <AppText variant="label" color={colors.white}>
-            {t('onboarding.illustrative')}
-          </AppText>
-        </View>
+        {/* Honesty, kept discreet: an illustration, not a try-on of the person using the app. */}
+        <AppText style={styles.caption} accessibilityLabel={t('onboarding.illustrative')} maxFontSizeMultiplier={1.4}>
+          {t('onboarding.illustrative')}
+        </AppText>
         {/* Approved brand symbol anchors the hero while the artwork is pending. */}
         <View
           style={styles.badge}
@@ -111,14 +109,16 @@ const styles = StyleSheet.create({
   // Full bleed: the ribbons run off the screen edge instead of stopping at the gutter.
   hero: { marginHorizontal: -layout.gutter, alignItems: 'center' },
   heroArt: { width: '100%', borderRadius: 0 },
+  // Deliberately tiny: a fine-print disclosure, not a label competing with the art.
   caption: {
     position: 'absolute',
-    top: space[3],
+    bottom: space[3],
     right: layout.gutter,
-    backgroundColor: colors.inkScrim,
-    borderRadius: radius.pill,
-    paddingHorizontal: space[3],
-    paddingVertical: space[1],
+    fontFamily: fonts.sans,
+    fontSize: 10,
+    lineHeight: 13,
+    color: colors.muted,
+    opacity: 0.8,
   },
   badge: {
     position: 'absolute',
