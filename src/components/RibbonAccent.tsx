@@ -18,6 +18,7 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -48,8 +49,25 @@ export function RibbonAccent({ placement = 'bottom', height = 140, style }: Ribb
 
   useEffect(() => {
     if (animate) {
+      const halfCycle = motion.ribbonCycle / 2;
+      const current = drift.get();
+      const curve = Easing.inOut(Easing.sin);
+
       drift.set(
-        withRepeat(withTiming(1, { duration: motion.ribbonCycle / 2, easing: Easing.inOut(Easing.sin) }), -1, true),
+        withSequence(
+          withTiming(0, {
+            duration: halfCycle * current,
+            easing: curve,
+          }),
+          withRepeat(
+            withTiming(1, {
+              duration: halfCycle,
+              easing: curve,
+            }),
+            -1,
+            true,
+          ),
+        ),
       );
     } else {
       cancelAnimation(drift);

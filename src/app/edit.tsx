@@ -25,6 +25,7 @@ import {
 } from '@/components';
 import type { Violation } from '@/domain/constraints';
 import { ZONES, type Zone } from '@/domain/types';
+import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { joinList, useT } from '@/i18n';
 import { imageFor, isSimulated } from '@/state/selectors';
 import { useSession } from '@/state/session';
@@ -33,6 +34,7 @@ import { colors, motion, radius, space } from '@/theme';
 export default function EditScreen() {
   const t = useT();
   const reduceMotion = useReducedMotion();
+  const motionAllowed = useMotionAllowed();
   const { state, actions } = useSession();
   const { selectedRecipe, draftRecipe, previousRecipe, edit, sourceImage } = state;
   const [open, setOpen] = useState<Zone | null>(() => ZONES.find((z) => selectedRecipe?.[z].enabled) ?? 'lips');
@@ -128,13 +130,20 @@ export default function EditScreen() {
 
       <View style={styles.photo}>
         <Image
-          source={showBefore ? sourceImage.uri : (image ?? sourceImage.uri)}
+          source={image ?? sourceImage.uri}
           contentFit="cover"
           transition={reduceMotion ? 0 : motion.emphasis}
           style={StyleSheet.absoluteFill}
-          accessibilityLabel={
-            showBefore ? t('selfie.review.photoAlt') : t('looks.lookAlt', { variant: t(`variants.${selectedRecipe.variant}`) })
-          }
+          accessible={!showBefore}
+          accessibilityLabel={t('looks.lookAlt', { variant: t(`variants.${selectedRecipe.variant}`) })}
+        />
+        <Image
+          source={sourceImage.uri}
+          contentFit="cover"
+          transition={0}
+          style={[StyleSheet.absoluteFill, { opacity: showBefore ? 1 : 0 }]}
+          accessible={showBefore}
+          accessibilityLabel={t('selfie.review.photoAlt')}
         />
         {!showBefore && isSimulated(state, selectedRecipe) ? <SimulationSeal compact style={styles.seal} /> : null}
         <PressableScale
@@ -150,7 +159,7 @@ export default function EditScreen() {
         </PressableScale>
         {applying ? (
           <View style={styles.applying} accessibilityLiveRegion="polite">
-            <ActivityIndicator color={colors.white} size="small" />
+            <ActivityIndicator color={colors.white} size="small" animating={motionAllowed} />
             <AppText variant="labelStrong" color={colors.white}>
               {t('edit.applying')}
             </AppText>

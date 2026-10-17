@@ -52,6 +52,9 @@ export default function CreatingScreen() {
   const translating = state.translation.status === 'loading';
   const ready = anyVariantReady(state);
   const settled = allVariantsSettled(state);
+  const shimmerVariant = VARIANTS.find(
+    (variant) => jobFor(state, variantRecipe(state, variant))?.status === 'processing',
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -171,6 +174,7 @@ export default function CreatingScreen() {
                     variant={variant}
                     recipe={recipe}
                     status={interpreting ? 'interpreting' : (jobFor(state, recipe)?.status ?? 'pending')}
+                    animateProgress={variant === shimmerVariant}
                     onRetry={() => void actions.retryVariant(variant)}
                   />
                 </ProgressEntrance>

@@ -11,6 +11,7 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { recipePalette } from '@/domain/recipe';
 import { getShade } from '@/domain/shades';
 import type { LookRecipe, RenderJob } from '@/domain/types';
+import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { useT } from '@/i18n';
 import { colors, cssEasing, layout, motion, radius, shadow, space } from '@/theme';
 
@@ -31,6 +32,7 @@ export interface LookVariantCardProps {
 export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCompare }: LookVariantCardProps) {
   const t = useT();
   const reduced = useReducedMotion();
+  const motionAllowed = useMotionAllowed();
   const ready = job?.status === 'success';
   const failed = job?.status === 'error';
   const name = t(`variants.${recipe.variant}`);
@@ -99,7 +101,7 @@ export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCo
                         <View key={zone} style={[styles.flatSwatch, { backgroundColor: getShade(shadeId).hex }]} />
                       ))}
                     </View>
-                    <ActivityIndicator color={colors.ink} size="small" animating={!reduced} />
+                    <ActivityIndicator color={colors.ink} size="small" animating={motionAllowed} />
                     <AppText variant="label" color={colors.ink} align="center">
                       {t('looks.loading')}
                     </AppText>

@@ -16,6 +16,7 @@ import {
   Screen,
   SecondaryButton,
 } from '@/components';
+import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { useT } from '@/i18n';
 import { useSession } from '@/state/session';
 import { colors, layout, radius, space } from '@/theme';
@@ -35,6 +36,7 @@ function CheckItem({ label }: { label: string }) {
 
 export default function ReviewSelfieScreen() {
   const t = useT();
+  const motionAllowed = useMotionAllowed();
   const { state } = useSession();
   const { width, height } = useWindowDimensions();
   const image = state.sourceImage;
@@ -82,7 +84,7 @@ export default function ReviewSelfieScreen() {
             accessibilityLiveRegion="polite"
             accessibilityLabel={t('selfie.review.checking')}
           >
-            <ActivityIndicator color={colors.white} size="small" />
+            <ActivityIndicator color={colors.white} size="small" animating={motionAllowed} />
             <AppText variant="label" color={colors.white} style={styles.checkingText}>
               {t('selfie.review.checking')}
             </AppText>

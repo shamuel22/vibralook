@@ -24,6 +24,7 @@ export interface LookProgressCardProps {
   variant: VariantKey;
   recipe?: LookRecipe;
   status: 'interpreting' | RenderStatus;
+  animateProgress?: boolean;
   onRetry?: () => void;
 }
 
@@ -77,7 +78,7 @@ function IndeterminateBar() {
   );
 }
 
-export function LookProgressCard({ variant, recipe, status, onRetry }: LookProgressCardProps) {
+export function LookProgressCard({ variant, recipe, status, animateProgress = false, onRetry }: LookProgressCardProps) {
   const t = useT();
   const Icon = status === 'error' ? null : ICON[status];
   const previousStatus = useRef(status);
@@ -126,7 +127,7 @@ export function LookProgressCard({ variant, recipe, status, onRetry }: LookProgr
               </AppText>
             </View>
           )}
-          {status === 'processing' && <IndeterminateBar />}
+          {status === 'processing' && animateProgress && <IndeterminateBar />}
         </View>
       </View>
       {status === 'error' && (

@@ -1,7 +1,7 @@
 /**
  * Screen scaffold: cream background, safe areas, BrandHeader, scrollable body centered at
  * max 560pt, and an optional sticky footer for the primary CTA (bottom safe area included).
- * Entrance: opacity + 10px rise over 360ms (DESIGN §6); none with reduced motion.
+ * Entrance: opacity + 8px rise over 360ms (DESIGN §6); none with reduced motion.
  */
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
@@ -12,6 +12,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, easing, layout, motion, space } from '@/theme';
 
 import { BrandHeader, type BrandHeaderProps } from './BrandHeader';
+
+const SCREEN_ENTER = FadeInDown.duration(motion.emphasis)
+  .easing(easing.enter)
+  .withInitialValues({
+    transform: [{ translateY: space[2] }],
+  });
 
 export interface ScreenProps {
   header?: BrandHeaderProps | false;
@@ -27,11 +33,7 @@ export interface ScreenProps {
 export function Screen({ header = {}, children, footer, background, scroll = true, contentStyle }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
-  const entering = reduceMotion
-    ? undefined
-    : FadeInDown.duration(motion.emphasis)
-        .easing(easing.enter)
-        .withInitialValues({ transform: [{ translateY: 10 }] });
+  const entering = reduceMotion ? undefined : SCREEN_ENTER;
 
   const body = (
     <Animated.View entering={entering} style={[styles.content, contentStyle]}>

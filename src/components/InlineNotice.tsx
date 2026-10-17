@@ -6,14 +6,20 @@
 import { AlertCircle, CheckCircle2, Info, Lock, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef, type ComponentRef } from 'react';
 import { AccessibilityInfo, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 
-import { colors, motion, radius, space } from '@/theme';
+import { colors, easing, motion, radius, space } from '@/theme';
 
 import { AppText } from './AppText';
 import { Button } from './Button';
 
 export type NoticeTone = 'info' | 'error' | 'success' | 'privacy';
+
+const NOTICE_ENTER = FadeInDown.duration(motion.base)
+  .easing(easing.enter)
+  .withInitialValues({
+    transform: [{ translateY: space[2] }],
+  });
 
 const TONES: Record<NoticeTone, { icon: LucideIcon; fg: string; bg: string; border: string }> = {
   info: { icon: Info, fg: colors.ink, bg: colors.creamDeep, border: colors.line },
@@ -43,7 +49,7 @@ export function InlineNotice({ tone = 'info', message, action, focusOnMount, sty
 
   return (
     <Animated.View
-      entering={reduceMotion ? undefined : FadeIn.duration(motion.base)}
+      entering={reduceMotion ? undefined : NOTICE_ENTER}
       style={[styles.box, { backgroundColor: cfg.bg, borderColor: cfg.border }, style]}
     >
       <View

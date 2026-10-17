@@ -7,7 +7,7 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { cssEasing } from '@/theme';
+import { cssEasing, motion } from '@/theme';
 
 export interface PressableScaleProps extends Omit<PressableProps, 'children' | 'style'> {
   children: ReactNode | ((state: { pressed: boolean }) => ReactNode);
@@ -56,7 +56,7 @@ export function PressableScale({
           {
             transform: [{ scale: active && !reduceMotion ? scaleTo : 1 }],
             transitionProperty: transitionColors ? ['transform', 'backgroundColor', 'borderColor'] : 'transform',
-            transitionDuration: transitionColors ? '140ms' : '120ms',
+            transitionDuration: active ? motion.pressIn : motion.quick,
             transitionTimingFunction: cssEasing.press,
           },
           style,

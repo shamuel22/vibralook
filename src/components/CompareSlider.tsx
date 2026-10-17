@@ -3,7 +3,6 @@
  * reveal the after image without animating layout. Drag is direct on the UI thread;
  * taps settle with a clamped spring, and assistive adjustments move immediately.
  */
-import { selectionAsync } from 'expo-haptics';
 import { Image } from 'expo-image';
 import { GripVertical } from 'lucide-react-native';
 import { useState } from 'react';
@@ -41,10 +40,6 @@ function clamp(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
-function edgeHaptic() {
-  void selectionAsync().catch(() => undefined);
-}
-
 export function CompareSlider({
   beforeUri,
   afterUri,
@@ -69,12 +64,6 @@ export function CompareSlider({
     () => committed.get(),
     (next, previous) => {
       if (previous !== null && next !== previous) scheduleOnRN(setPercent, next);
-    },
-  );
-  useAnimatedReaction(
-    () => (position.get() <= 0 ? -1 : position.get() >= 1 ? 1 : 0),
-    (edge, previous) => {
-      if (previous !== null && edge !== 0 && edge !== previous) scheduleOnRN(edgeHaptic);
     },
   );
 

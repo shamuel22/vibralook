@@ -89,6 +89,7 @@ export const layout = {
 /** DESIGN §3 motion tokens. Durations in ms. */
 export const motion = {
   quick: 120,
+  pressIn: 140,
   base: 220,
   emphasis: 360,
   scene: 560,

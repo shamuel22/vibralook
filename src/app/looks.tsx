@@ -27,6 +27,15 @@ import { imageFor, variantRecipe } from '@/state/selectors';
 import { useSession } from '@/state/session';
 import { colors, easing, layout, motion, space } from '@/theme';
 
+const LOOK_ENTRANCES = VARIANTS.map((_, index) =>
+  FadeInDown.delay(index * motion.stagger)
+    .duration(motion.emphasis)
+    .easing(easing.enter)
+    .withInitialValues({
+      transform: [{ translateY: space[2] }],
+    }),
+);
+
 export default function LooksScreen() {
   const t = useT();
   const reduceMotion = useReducedMotion();
@@ -34,6 +43,7 @@ export default function LooksScreen() {
   const { state, actions } = useSession();
   const [selected, setSelected] = useState<VariantKey | null>(state.chosenVariant);
   const [comparing, setComparing] = useState<VariantKey | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   if (!state.sourceImage) return <Redirect href="/selfie" />;
   if (state.variants.length === 0) return <Redirect href="/creating" />;
@@ -42,7 +52,7 @@ export default function LooksScreen() {
   const canChoose = Boolean(selectedRecipe && imageFor(state, selectedRecipe));
 
   const choose = (variant: VariantKey) => {
-    setComparing(null);
+    setCompareOpen(false);
     actions.dispatch({ type: 'looks/choose', variant });
     router.push('/edit');
   };
@@ -70,14 +80,7 @@ export default function LooksScreen() {
           return (
             <Animated.View
               key={variant}
-              entering={
-                reduceMotion
-                  ? undefined
-                  : FadeInDown.delay(i * motion.stagger)
-                      .duration(motion.emphasis)
-                      .easing(easing.enter)
-                      .withInitialValues({ transform: [{ translateY: 10 }] })
-              }
+              entering={reduceMotion ? undefined : LOOK_ENTRANCES[i]}
             >
               <LookVariantCard
                 recipe={recipe}
@@ -85,7 +88,10 @@ export default function LooksScreen() {
                 selected={selected === variant}
                 onSelect={() => setSelected(variant)}
                 onRetry={() => actions.retryVariant(variant)}
-                onCompare={() => setComparing(variant)}
+                onCompare={() => {
+                  setComparing(variant);
+                  setCompareOpen(true);
+                }}
               />
             </Animated.View>
           );
@@ -93,10 +99,10 @@ export default function LooksScreen() {
       </View>
 
       <Modal
-        visible={Boolean(comparing && compareImage)}
+        visible={Boolean(compareOpen && comparing && compareImage)}
         animationType={reduceMotion ? 'fade' : 'slide'}
         presentationStyle="pageSheet"
-        onRequestClose={() => setComparing(null)}
+        onRequestClose={() => setCompareOpen(false)}
       >
         {comparing && compareImage ? (
           // Modals are a separate native root: gestures need their own root view on Android.
@@ -116,7 +122,7 @@ export default function LooksScreen() {
               <PressableScale
                 accessibilityRole="button"
                 accessibilityLabel={t('common.close')}
-                onPress={() => setComparing(null)}
+                onPress={() => setCompareOpen(false)}
                 style={styles.close}
               >
                 <X color={colors.ink} size={24} strokeWidth={1.75} />

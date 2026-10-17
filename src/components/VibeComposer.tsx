@@ -6,11 +6,10 @@
 import { PencilLine } from 'lucide-react-native';
 import { useRef, type ComponentRef } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 
 import { VIBE_MAX_LENGTH } from '@/domain/types';
 import { useT } from '@/i18n';
-import { colors, fonts, layout, motion, radius, shadow, space } from '@/theme';
+import { colors, fonts, layout, radius, shadow, space } from '@/theme';
 
 import { AppText } from './AppText';
 import { ArtPlaceholder, type ArtId } from './ArtPlaceholder';
@@ -32,7 +31,6 @@ export interface VibeComposerProps {
 
 export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
   const t = useT();
-  const reduceMotion = useReducedMotion();
   const input = useRef<ComponentRef<typeof TextInput>>(null);
   const activeExample = VIBE_EXAMPLES.find((e) => t(`intent.examples.${e}`) === value.trim());
 
@@ -40,9 +38,9 @@ export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
     <View style={styles.wrap}>
       <View style={[styles.card, error ? styles.cardError : null]}>
         {activeExample ? (
-          <Animated.View key={activeExample} entering={reduceMotion ? undefined : FadeIn.duration(motion.base)}>
+          <View>
             <ArtPlaceholder id={EXAMPLE_ART[activeExample]} aspectRatio={16 / 9} decorative style={styles.art} />
-          </Animated.View>
+          </View>
         ) : null}
         <Pressable
           accessible={false}

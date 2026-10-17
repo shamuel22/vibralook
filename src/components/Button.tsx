@@ -7,6 +7,7 @@
 import { ArrowRight, type LucideIcon } from 'lucide-react-native';
 import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { colors, layout, radius, space } from '@/theme';
 
 import { AppText } from './AppText';
@@ -43,6 +44,7 @@ export function Button({
   style,
   compact = false,
 }: ButtonProps) {
+  const motionAllowed = useMotionAllowed();
   const primary = variant === 'primary';
   const fg = primary ? colors.white : colors.ink;
   const inactive = disabled || loading;
@@ -67,7 +69,7 @@ export function Button({
     >
       <View style={styles.row}>
         {loading ? (
-          <ActivityIndicator color={fg} size="small" />
+          <ActivityIndicator color={fg} size="small" animating={motionAllowed} />
         ) : Icon ? (
           <Icon color={fg} size={iconSize} strokeWidth={1.75} />
         ) : null}

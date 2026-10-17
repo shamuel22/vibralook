@@ -84,7 +84,6 @@ export function Swatch({
       accessibilityState={{ checked: selected, disabled }}
       disabled={disabled}
       onPress={onPress}
-      scaleTo={0.94}
       containerStyle={style}
       style={[styles.touch, { minWidth: Math.max(layout.minTouch, ring), minHeight: Math.max(layout.minTouch, ring) }]}
     >

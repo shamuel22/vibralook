@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, BrandHeader, InlineNotice, PressableScale, SecondaryButton } from '@/components';
 import { FaceGuide } from '@/components/FaceGuide';
+import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { useT, type TKey } from '@/i18n';
 import { prepareSelfie, SelfiePreparationError } from '@/services/imagePrep';
 import { useSession } from '@/state/session';
@@ -92,6 +93,7 @@ function CameraHint({ ready }: { ready: boolean }) {
 
 export default function CameraScreen() {
   const t = useT();
+  const motionAllowed = useMotionAllowed();
   const { actions } = useSession();
   const insets = useSafeAreaInsets();
   const focused = useIsFocused();
@@ -300,7 +302,7 @@ export default function CameraScreen() {
         >
           <View style={styles.shutterInner}>
             {(status === 'starting' || status === 'capturing') && !failed && (
-              <ActivityIndicator color={colors.white} size="small" />
+              <ActivityIndicator color={colors.white} size="small" animating={motionAllowed} />
             )}
           </View>
         </PressableScale>

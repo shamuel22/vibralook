@@ -42,7 +42,10 @@ export default function RootLayout() {
               >
                 <Stack.Screen
                   name="selfie/camera"
-                  options={{ animation: reduceMotion ? 'fade' : 'slide_from_bottom' }}
+                  options={{
+                    animation: reduceMotion ? 'fade' : 'slide_from_bottom',
+                    animationMatchesGesture: true,
+                  }}
                 />
                 <Stack.Screen name="creating" options={{ gestureEnabled: false }} />
                 <Stack.Screen
