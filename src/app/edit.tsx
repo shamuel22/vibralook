@@ -165,6 +165,9 @@ export default function EditScreen() {
           accessibilityLabel={t('compare.showBefore')}
           accessibilityState={{ checked: showBefore }}
           onPress={() => setShowBefore((v) => !v)}
+          // Position on the pressable itself: absolute styles on the inner view left the touch
+          // area at zero height (unreachable on iOS and for screen readers).
+          containerStyle={styles.beforePos}
           style={[styles.beforeBtn, showBefore && styles.beforeBtnOn]}
         >
           <AppText variant="labelStrong" color={showBefore ? colors.ink : colors.white}>
@@ -230,11 +233,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.creamDeep,
   },
   seal: { position: 'absolute', left: 0, right: 0, bottom: 0, borderRadius: 0 },
+  beforePos: { position: 'absolute', top: space[3], right: space[3] },
   beforeBtn: {
-    position: 'absolute',
-    top: space[3],
-    right: space[3],
-    minHeight: 40,
+    minHeight: 44,
     paddingHorizontal: space[4],
     justifyContent: 'center',
     borderRadius: radius.pill,
