@@ -5,7 +5,7 @@
  */
 import { Image } from 'expo-image';
 import { AlertCircle, Info } from 'lucide-react-native';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { recipePalette } from '@/domain/recipe';
@@ -32,6 +32,8 @@ export interface LookVariantCardProps {
 export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCompare }: LookVariantCardProps) {
   const t = useT();
   const reduced = useReducedMotion();
+  // Large text: photo above the copy so neither column gets squeezed.
+  const stacked = useWindowDimensions().fontScale >= 1.3;
   const motionAllowed = useMotionAllowed();
   const ready = job?.status === 'success';
   const failed = job?.status === 'error';
@@ -65,9 +67,9 @@ export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCo
       >
         <View />
       </PressableScale>
-      <View style={styles.row} pointerEvents="box-none">
-        <View style={styles.photoColumn} pointerEvents="box-none">
-          <View style={[styles.photo, ready && styles.photoAspect]} pointerEvents={failed ? 'box-none' : 'none'}>
+      <View style={[styles.row, stacked && styles.stackedRow]} pointerEvents="box-none">
+        <View style={[styles.photoColumn, stacked && styles.stackedPhoto]} pointerEvents="box-none">
+          <View style={[styles.photo, ready && (stacked ? styles.photoSquare : styles.photoAspect)]} pointerEvents={failed ? 'box-none' : 'none'}>
             {ready && job.imageUri ? (
               <Image
                 source={job.imageUri}
@@ -187,6 +189,9 @@ const styles = StyleSheet.create({
   photoColumn: { width: '42%', gap: space[2] },
   photo: { width: '100%', borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.creamDeep },
   photoAspect: { aspectRatio: 4 / 5 },
+  photoSquare: { aspectRatio: 1 },
+  stackedRow: { flexDirection: 'column', alignItems: 'stretch' },
+  stackedPhoto: { width: '100%' },
   placeholder: {
     minHeight: space[12] * 3,
     alignItems: 'center',

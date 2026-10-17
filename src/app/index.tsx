@@ -61,7 +61,7 @@ export default function IntentScreen() {
   return (
     <Screen
       header={{ hideBack: true, stage: 'vibe' }}
-      background={<RibbonAccent height={150} />}
+      background={<RibbonAccent height={120} />}
       footer={<PrimaryButton label={t('intent.cta')} onPress={submit} />}
     >
       <EditorialHeading title={t('intent.title')} subtitle={t('intent.subtitle')} />

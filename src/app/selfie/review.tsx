@@ -15,6 +15,7 @@ import {
   RibbonAccent,
   Screen,
   SecondaryButton,
+  ButtonRow,
 } from '@/components';
 import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { useT } from '@/i18n';
@@ -50,22 +51,24 @@ export default function ReviewSelfieScreen() {
       header={{ stage: 'selfie' }}
       background={<RibbonAccent />}
       footer={
-        <View style={styles.footer}>
-          <SecondaryButton
-            label={t('selfie.review.retake')}
-            icon={RotateCcw}
-            style={styles.footerButton}
-            onPress={() => router.replace(image.origin === 'camera' ? '/selfie/camera' : '/selfie')}
-          />
-          <PrimaryButton
-            label={t('selfie.review.use')}
-            disabled={!valid}
-            style={styles.primaryButton}
-            onPress={() => {
-              if (valid) router.push('/kit');
-            }}
-          />
-        </View>
+        <ButtonRow
+          secondary={
+            <SecondaryButton
+              label={t('selfie.review.retake')}
+              icon={RotateCcw}
+              onPress={() => router.replace(image.origin === 'camera' ? '/selfie/camera' : '/selfie')}
+            />
+          }
+          primary={
+            <PrimaryButton
+              label={t('selfie.review.use')}
+              disabled={!valid}
+              onPress={() => {
+                if (valid) router.push('/kit');
+              }}
+            />
+          }
+        />
       }
     >
       <EditorialHeading title={t('selfie.review.title')} subtitle={t('selfie.review.subtitle')} />
@@ -142,8 +145,5 @@ const styles = StyleSheet.create({
     flexBasis: '40%',
   },
   checkLabel: { flexShrink: 1 },
-  footer: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
-  footerButton: { flexGrow: 1, flexBasis: layout.minTouch * 3 },
-  primaryButton: { flexGrow: 1.6, flexBasis: layout.minTouch * 4 },
   spacer: { height: space[4] },
 });

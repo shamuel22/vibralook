@@ -14,6 +14,7 @@ import { captureRef } from 'react-native-view-shot';
 
 import {
   AppText,
+  ButtonRow,
   CompareSlider,
   EditorialHeading,
   InlineNotice,
@@ -81,25 +82,27 @@ export default function ResultScreen() {
     <Screen
       header={{ stage: 'result' }}
       footer={
-        <View style={styles.row}>
-          <SecondaryButton
-            label={t('result.share')}
-            icon={Share2}
-            arrow={false}
-            loading={sharing}
-            onPress={shareCard}
-            style={styles.flex}
-          />
-          <PrimaryButton
-            label={t('result.save')}
-            icon={Bookmark}
-            arrow={false}
-            loading={save === 'saving'}
-            loadingLabel={t('result.saving')}
-            onPress={saveCard}
-            style={styles.flex2}
-          />
-        </View>
+        <ButtonRow
+          secondary={
+            <SecondaryButton
+              label={t('result.share')}
+              icon={Share2}
+              arrow={false}
+              loading={sharing}
+              onPress={shareCard}
+            />
+          }
+          primary={
+            <PrimaryButton
+              label={t('result.save')}
+              icon={Bookmark}
+              arrow={false}
+              loading={save === 'saving'}
+              loadingLabel={t('result.saving')}
+              onPress={saveCard}
+            />
+          }
+        />
       }
     >
       <EditorialHeading title={t('result.title')} subtitle={t('result.subtitle')} />
@@ -119,10 +122,15 @@ export default function ResultScreen() {
       <View style={styles.paletteRow}>
         <View style={styles.swatches}>
           {recipePalette(finalRecipe).map(({ zone, shadeId }) => (
-            <Swatch key={zone} shadeId={shadeId} size="lg" accessibilityLabel={`${t(`kit.zones.${zone}`)}: ${shadeLabel(t, shadeId)}`} />
+            <Swatch
+              key={zone}
+              shadeId={shadeId}
+              size="lg"
+              accessibilityLabel={`${t(`kit.zones.${zone}`)}: ${shadeLabel(t, shadeId)}`}
+            />
           ))}
         </View>
-        <View style={styles.flex}>
+        <View style={styles.paletteText}>
           <AppText variant="eyebrow">{name}</AppText>
           <AppText variant="label">{finalRecipe.tagline}</AppText>
         </View>
@@ -148,7 +156,12 @@ export default function ResultScreen() {
       />
 
       {/* Off-screen source of the PNG card; captured, never shown or read twice. */}
-      <View style={styles.offscreen} pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants">
+      <View
+        style={styles.offscreen}
+        pointerEvents="none"
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+      >
         <LookCard ref={card} recipe={finalRecipe} imageUri={image} simulated={simulated} />
       </View>
     </Screen>
@@ -157,10 +170,9 @@ export default function ResultScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  row: { flexDirection: 'row', gap: space[3] },
-  flex2: { flex: 1.5 },
   paletteRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: space[4],
     padding: space[4],
@@ -169,6 +181,8 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   swatches: { flexDirection: 'row', gap: space[1] },
+  // Wraps under the swatches instead of squeezing into a narrow column.
+  paletteText: { flexGrow: 1, flexBasis: 160 },
   why: { gap: space[2] },
   offscreen: { position: 'absolute', left: -LOOK_CARD_WIDTH * 3, top: 0, width: LOOK_CARD_WIDTH },
 });

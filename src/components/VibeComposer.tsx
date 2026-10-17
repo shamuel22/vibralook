@@ -4,8 +4,8 @@
  * shows that example's scene artwork slot; typing freely hides it.
  */
 import { PencilLine } from 'lucide-react-native';
-import { useRef, type ComponentRef } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useRef, type ComponentRef } from 'react';
+import { Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { VIBE_MAX_LENGTH } from '@/domain/types';
 import { useT } from '@/i18n';
@@ -17,6 +17,7 @@ import { PressableScale } from './PressableScale';
 
 export type VibeExample = 'jazz' | 'sakura' | 'meeting';
 export const VIBE_EXAMPLES: VibeExample[] = ['jazz', 'sakura', 'meeting'];
+const INPUT_LINE = 28;
 const EXAMPLE_ART: Record<VibeExample, ArtId> = {
   jazz: 'vl_intencion_escena_jazz_v01',
   sakura: 'vl_intencion_escena_sakura_v01',
@@ -32,6 +33,14 @@ export interface VibeComposerProps {
 export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
   const t = useT();
   const input = useRef<ComponentRef<typeof TextInput>>(null);
+  // Multiline inputs don't grow for the placeholder; reserve ~3 lines at the current font scale.
+  const { fontScale } = useWindowDimensions();
+  const minInputHeight = Math.round(INPUT_LINE * 3 * Math.min(fontScale, 2));
+
+  // A blocking error takes focus to the field: the keyboard opens and the field scrolls into view.
+  useEffect(() => {
+    if (error) input.current?.focus();
+  }, [error]);
   const activeExample = VIBE_EXAMPLES.find((e) => t(`intent.examples.${e}`) === value.trim());
 
   return (
@@ -67,7 +76,7 @@ export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
             accessibilityLabelledBy="vibe-label"
             accessibilityHint={error}
             maxFontSizeMultiplier={2}
-            style={styles.input}
+            style={[styles.input, { minHeight: minInputHeight }]}
             selectionColor={colors.coral}
           />
           {activeExample ? (
@@ -132,9 +141,8 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: fonts.serif,
     fontSize: 22,
-    lineHeight: 28,
+    lineHeight: INPUT_LINE,
     color: colors.ink,
-    minHeight: 64,
     padding: 0,
     textAlignVertical: 'top',
   },

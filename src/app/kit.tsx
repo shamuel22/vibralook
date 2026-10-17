@@ -11,6 +11,7 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   AppText,
+  ButtonRow,
   EditorialHeading,
   InlineNotice,
   KitSelector,
@@ -50,10 +51,10 @@ export default function KitScreen() {
     <Screen
       header={{ stage: 'kit' }}
       footer={
-        <View style={styles.footerRow}>
-          <SecondaryButton label={t('kit.skip')} arrow={false} onPress={() => proceed('skip')} style={styles.flex} />
-          <PrimaryButton label={t('kit.continue')} onPress={() => proceed('declare')} style={styles.flex} />
-        </View>
+        <ButtonRow
+          secondary={<SecondaryButton label={t('kit.skip')} arrow={false} onPress={() => proceed('skip')} />}
+          primary={<PrimaryButton label={t('kit.continue')} onPress={() => proceed('declare')} />}
+        />
       }
     >
       <EditorialHeading title={t('kit.title')} subtitle={t('kit.subtitle')} />
@@ -100,8 +101,6 @@ export default function KitScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  footerRow: { flexDirection: 'row', gap: space[3] },
   photoCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -112,7 +111,8 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   thumb: { width: 96, aspectRatio: 4 / 5, borderRadius: radius.md, backgroundColor: colors.creamDeep },
-  photoText: { flex: 1, gap: space[1] },
+  // Leaves room for the check badge in the corner.
+  photoText: { flex: 1, gap: space[1], paddingRight: space[8] },
   check: {
     position: 'absolute',
     top: space[3],

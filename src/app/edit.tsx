@@ -14,6 +14,7 @@ import { useReducedMotion } from 'react-native-reanimated';
 
 import {
   AppText,
+  ButtonRow,
   EditorialHeading,
   InlineNotice,
   PressableScale,
@@ -55,7 +56,11 @@ export default function EditScreen() {
   const working = draftRecipe ?? selectedRecipe;
   const applying = edit.applyingId !== null;
   const image = imageFor(state, selectedRecipe);
-  const zoneList = (zones: Zone[]) => joinList(zones.map((z) => t(`zonesLower.${z}`)), t('edit.listJoin'));
+  const zoneList = (zones: Zone[]) =>
+    joinList(
+      zones.map((z) => t(`zonesLower.${z}`)),
+      t('edit.listJoin'),
+    );
   const others = state.variants.filter((v) => v.variant !== selectedRecipe.variant);
 
   const apply = async () => {
@@ -82,47 +87,51 @@ export default function EditScreen() {
       header={{ stage: 'looks', backLocked: applying }}
       footer={
         draftRecipe || applying ? (
-          <View style={styles.row}>
-            <SecondaryButton
-              label={t('common.cancel')}
-              arrow={false}
-              disabled={applying}
-              onPress={() => {
-                setBlocked(null);
-                actions.dispatch({ type: 'edit/discard' });
-              }}
-              style={styles.flex}
-            />
-            <PrimaryButton
-              label={t('edit.seeChange')}
-              icon={Eye}
-              arrow={false}
-              loading={applying}
-              loadingLabel={t('edit.applying')}
-              onPress={apply}
-              style={styles.flex2}
-            />
-          </View>
-        ) : (
-          <View style={styles.row}>
-            {previousRecipe ? (
+          <ButtonRow
+            secondary={
               <SecondaryButton
-                label={t('common.undo')}
-                icon={RotateCcw}
+                label={t('common.cancel')}
                 arrow={false}
-                onPress={() => actions.dispatch({ type: 'edit/undo' })}
-                style={styles.flex}
+                disabled={applying}
+                onPress={() => {
+                  setBlocked(null);
+                  actions.dispatch({ type: 'edit/discard' });
+                }}
               />
-            ) : null}
-            <PrimaryButton
-              label={t('edit.toResult')}
-              onPress={() => {
-                actions.dispatch({ type: 'result/finalize' });
-                router.push('/result');
-              }}
-              style={styles.flex2}
-            />
-          </View>
+            }
+            primary={
+              <PrimaryButton
+                label={t('edit.seeChange')}
+                icon={Eye}
+                arrow={false}
+                loading={applying}
+                loadingLabel={t('edit.applying')}
+                onPress={apply}
+              />
+            }
+          />
+        ) : (
+          <ButtonRow
+            secondary={
+              previousRecipe ? (
+                <SecondaryButton
+                  label={t('common.undo')}
+                  icon={RotateCcw}
+                  arrow={false}
+                  onPress={() => actions.dispatch({ type: 'edit/undo' })}
+                />
+              ) : undefined
+            }
+            primary={
+              <PrimaryButton
+                label={t('edit.toResult')}
+                onPress={() => {
+                  actions.dispatch({ type: 'result/finalize' });
+                  router.push('/result');
+                }}
+              />
+            }
+          />
         )
       }
     >
@@ -170,7 +179,12 @@ export default function EditScreen() {
       {summary && !draftRecipe && !applying ? <InlineNotice tone="success" message={summary} /> : null}
       {edit.undone ? <InlineNotice tone="info" message={t('edit.undone')} /> : null}
       {edit.failed ? (
-        <InlineNotice tone="error" focusOnMount message={t('edit.renderError')} action={{ label: t('common.retry'), onPress: apply }} />
+        <InlineNotice
+          tone="error"
+          focusOnMount
+          message={t('edit.renderError')}
+          action={{ label: t('common.retry'), onPress: apply }}
+        />
       ) : null}
       {blockedMessage ? <InlineNotice tone="error" focusOnMount message={blockedMessage} /> : null}
 
@@ -203,9 +217,6 @@ export default function EditScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  flex2: { flex: 1.6 },
-  row: { flexDirection: 'row', gap: space[3] },
   photo: {
     width: '100%',
     aspectRatio: 4 / 5,

@@ -30,6 +30,8 @@ export function ResultRecipe({ steps, imageUri, paletteSource }: ResultRecipePro
   const { fontScale } = useWindowDimensions();
   const numberSize = space[8] * Math.max(1, Math.min(2, fontScale));
   const total = steps.reduce((minutes, step) => minutes + step.minutes, 0);
+  // Large text: number + thumbnail on their own row, instruction full width below.
+  const stacked = fontScale >= 1.3;
   return (
     <View style={styles.recipe}>
       <AppText variant="eyebrow" accessibilityRole="header">
@@ -49,7 +51,11 @@ export function ResultRecipe({ steps, imageUri, paletteSource }: ResultRecipePro
               accessibilityLabel={`${t('common.stepOf', { current: index + 1, total: steps.length })}, ${zoneLabel}, ${step.text}, ${minutes}`}
               style={styles.step}
             >
-              <View style={styles.stepHeader} accessible={false} importantForAccessibility="no-hide-descendants">
+              <View
+                style={[styles.stepHeader, stacked && styles.stackedHeader]}
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+              >
                 <View style={[styles.number, { width: numberSize, height: numberSize }]}>
                   <AppText variant="labelStrong">{index + 1}</AppText>
                 </View>
@@ -75,7 +81,7 @@ export function ResultRecipe({ steps, imageUri, paletteSource }: ResultRecipePro
                     </View>
                   )}
                 </View>
-                <View style={styles.instruction}>
+                <View style={[styles.instruction, stacked && styles.stackedInstruction]}>
                   <AppText variant="bodyStrong">{zoneLabel}</AppText>
                   <AppText variant="label" color={colors.ink}>
                     {step.text}
@@ -110,6 +116,7 @@ const styles = StyleSheet.create({
   list: { gap: space[6] },
   step: { gap: space[2] },
   stepHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  stackedHeader: { flexWrap: 'wrap' },
   number: {
     borderRadius: radius.pill,
     borderWidth: 1,
@@ -132,6 +139,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   instruction: { flex: 1, minWidth: 0, gap: space[1] },
+  stackedInstruction: { flexBasis: '100%' },
   total: {
     flexDirection: 'row',
     alignItems: 'flex-start',
