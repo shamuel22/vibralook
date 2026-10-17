@@ -4,7 +4,8 @@
  * Entrance: opacity + 10px rise over 360ms (DESIGN §6); none with reduced motion.
  */
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,7 +27,11 @@ export interface ScreenProps {
 export function Screen({ header = {}, children, footer, background, scroll = true, contentStyle }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
-  const entering = reduceMotion ? undefined : FadeInDown.duration(motion.emphasis).easing(easing.enter).withInitialValues({ transform: [{ translateY: 10 }] });
+  const entering = reduceMotion
+    ? undefined
+    : FadeInDown.duration(motion.emphasis)
+        .easing(easing.enter)
+        .withInitialValues({ transform: [{ translateY: 10 }] });
 
   const body = (
     <Animated.View entering={entering} style={[styles.content, contentStyle]}>
@@ -38,16 +43,18 @@ export function Screen({ header = {}, children, footer, background, scroll = tru
     <View style={[styles.root, { paddingTop: insets.top }]}>
       {background}
       {header !== false && <BrandHeader {...header} />}
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* Keeps the sticky CTA above the keyboard on both platforms (Android edge-to-edge included). */}
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         {scroll ? (
-          <ScrollView
+          <KeyboardAwareScrollView
+            bottomOffset={space[6]}
             style={styles.flex}
             contentContainerStyle={[styles.scroll, !footer && { paddingBottom: insets.bottom + space[8] }]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
             {body}
-          </ScrollView>
+          </KeyboardAwareScrollView>
         ) : (
           <View style={styles.flex}>{body}</View>
         )}

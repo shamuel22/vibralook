@@ -3,6 +3,7 @@
  * translation, 3–5 steps within the chosen time, and a PNG card saved to Photos or shared.
  * Everything shown comes from `finalRecipe` (honesty rule).
  */
+import * as Haptics from 'expo-haptics';
 import { Asset, requestPermissionsAsync } from 'expo-media-library';
 import { Redirect, router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
@@ -57,8 +58,10 @@ export default function ResultScreen() {
       if (!permission.granted) throw new Error('media-permission');
       await Asset.create(uri);
       setSave('saved');
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
       setSave('error');
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 

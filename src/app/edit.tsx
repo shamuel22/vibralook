@@ -4,10 +4,11 @@
  * re-renders from the ORIGINAL selfie while the last valid image stays on screen with
  * «Aplicando cambio…». The new image dissolves in only when it arrives. One-step undo.
  */
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { Redirect, router } from 'expo-router';
 import { Eye, RotateCcw } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
@@ -37,6 +38,14 @@ export default function EditScreen() {
   const [open, setOpen] = useState<Zone | null>(() => ZONES.find((z) => selectedRecipe?.[z].enabled) ?? 'lips');
   const [showBefore, setShowBefore] = useState(false);
   const [blocked, setBlocked] = useState<Violation | null>(null);
+
+  // One haptic per confirmed edit, fired when the new image actually arrives (or fails).
+  useEffect(() => {
+    if (edit.lastChange) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, [edit.lastChange]);
+  useEffect(() => {
+    if (edit.failed) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  }, [edit.failed]);
 
   if (!sourceImage) return <Redirect href="/selfie" />;
   if (!selectedRecipe) return <Redirect href="/looks" />;
