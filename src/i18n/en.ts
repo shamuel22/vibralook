@@ -203,6 +203,16 @@ const en: Dictionary = {
     seeLooks: 'See my looks',
     cancelSession: 'Cancel',
     editorialNotice: 'We used a pre-designed editorial recipe for this vibe.',
+    noFaceNotice: 'We couldn’t find your face in the photo. Try a front-facing selfie, closer and in good light.',
+    changePhoto: 'Change photo',
+  },
+  renderErrors: {
+    provider: 'This look couldn’t be created. You can try again.',
+    providerFinal: 'This look couldn’t be created right now.',
+    noFace: 'We couldn’t find your whole face in the photo.',
+    timeout: 'The try-on took too long. You can try again.',
+    network: 'The connection dropped. Check your internet and try again.',
+    limit: 'You’ve reached this session’s try-on limit. Start over to keep going.',
   },
   looks: {
     title: 'Three ways to feel it',

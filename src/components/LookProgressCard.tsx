@@ -10,9 +10,10 @@ import { AppState, StyleSheet, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { recipePalette } from '@/domain/recipe';
-import type { LookRecipe, RenderStatus, VariantKey } from '@/domain/types';
+import type { LookRecipe, RenderJob, RenderStatus, VariantKey } from '@/domain/types';
 import { useAccessibilityAnnouncement } from '@/hooks/useAccessibilityAnnouncement';
 import { useT } from '@/i18n';
+import { renderErrorKey } from '@/state/selectors';
 import { colors, motion, radius, shadow, space } from '@/theme';
 
 import { AppText } from './AppText';
@@ -26,6 +27,8 @@ export interface LookProgressCardProps {
   recipe?: LookRecipe;
   status: 'interpreting' | RenderStatus;
   animateProgress?: boolean;
+  /** Why the render failed; decides the message and whether retry is offered. */
+  error?: RenderJob['error'];
   onRetry?: () => void;
 }
 
@@ -84,10 +87,12 @@ function IndeterminateBar() {
   );
 }
 
-export function LookProgressCard({ variant, recipe, status, animateProgress = false, onRetry }: LookProgressCardProps) {
+export function LookProgressCard({ variant, recipe, status, animateProgress = false, error, onRetry }: LookProgressCardProps) {
   const t = useT();
   const Icon = status === 'error' ? null : ICON[status];
-  const active = useAccessibilityAnnouncement(`${t(`variants.${variant}`)}. ${t(STATUS[status])}`);
+  const statusText = status === 'error' ? t(renderErrorKey(error)) : t(STATUS[status]);
+  const canRetry = status === 'error' && (error?.retriable ?? true);
+  const active = useAccessibilityAnnouncement(`${t(`variants.${variant}`)}. ${statusText}`);
   return (
     <View style={[styles.card, status === 'processing' && styles.processing]}>
       <View style={styles.row}>
@@ -139,13 +144,13 @@ export function LookProgressCard({ variant, recipe, status, animateProgress = fa
             accessible
             accessibilityRole="text"
             accessibilityLiveRegion={active ? 'polite' : 'none'}
-            accessibilityLabel={t('creating.statusError')}
+            accessibilityLabel={statusText}
           >
             <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              <InlineNotice tone="error" message={t('creating.statusError')} />
+              <InlineNotice tone="error" message={statusText} />
             </View>
           </View>
-          {onRetry && <Button variant="secondary" compact arrow={false} label={t('looks.retry')} onPress={onRetry} />}
+          {onRetry && canRetry && <Button variant="secondary" compact arrow={false} label={t('looks.retry')} onPress={onRetry} />}
         </View>
       )}
     </View>

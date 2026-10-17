@@ -202,6 +202,16 @@ const es = {
     seeLooks: 'Ver mis looks',
     cancelSession: 'Cancelar',
     editorialNotice: 'Usamos una receta editorial prediseñada para esta vibra.',
+    noFaceNotice: 'No pudimos encontrar tu rostro en la foto. Prueba con una selfie de frente, cerca y con buena luz.',
+    changePhoto: 'Cambiar foto',
+  },
+  renderErrors: {
+    provider: 'Este look no se pudo generar. Puedes reintentarlo.',
+    providerFinal: 'Este look no se pudo generar ahora.',
+    noFace: 'No encontramos tu rostro completo en la foto.',
+    timeout: 'La prueba tardó demasiado. Puedes reintentarlo.',
+    network: 'Se cortó la conexión. Revisa tu internet y reintenta.',
+    limit: 'Llegaste al límite de pruebas de esta sesión. Empieza de nuevo para seguir.',
   },
   looks: {
     title: 'Tres maneras de sentirlo',

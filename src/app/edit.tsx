@@ -29,7 +29,7 @@ import { ZONES, type Zone } from '@/domain/types';
 import { useCancelOnLeave } from '@/hooks/useCancelOnLeave';
 import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { joinList, useT } from '@/i18n';
-import { imageFor, isSimulated } from '@/state/selectors';
+import { imageFor, isSimulated, jobFor, renderErrorKey } from '@/state/selectors';
 import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
 
@@ -58,6 +58,7 @@ export default function EditScreen() {
   if (!selectedRecipe) return <Redirect href="/looks" />;
 
   const working = draftRecipe ?? selectedRecipe;
+  const editError = edit.failed ? jobFor(state, draftRecipe)?.error : undefined;
   const applying = edit.applyingId !== null;
   const image = imageFor(state, selectedRecipe);
   const zoneList = (zones: Zone[]) =>
@@ -186,8 +187,8 @@ export default function EditScreen() {
         <InlineNotice
           tone="error"
           focusOnMount
-          message={t('edit.renderError')}
-          action={{ label: t('common.retry'), onPress: apply }}
+          message={editError?.retriable === false ? `${t('edit.renderError')} ${t(renderErrorKey(editError))}` : t('edit.renderError')}
+          action={editError?.retriable === false ? undefined : { label: t('common.retry'), onPress: apply }}
         />
       ) : null}
       {blockedMessage ? <InlineNotice tone="error" focusOnMount message={blockedMessage} /> : null}

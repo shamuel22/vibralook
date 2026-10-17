@@ -36,3 +36,12 @@ export function allVariantsSettled(s: SessionState): boolean {
 /** The five person-facing stages (PLAN §2.3) and which one a route belongs to. */
 export const STAGES = ['vibe', 'selfie', 'kit', 'looks', 'result'] as const;
 export type Stage = (typeof STAGES)[number];
+
+/** Copy for a failed render: what happened and whether retrying can help. */
+export function renderErrorKey(
+  error: RenderJob['error'] | undefined,
+): 'renderErrors.provider' | 'renderErrors.providerFinal' | 'renderErrors.noFace' | 'renderErrors.timeout' | 'renderErrors.network' | 'renderErrors.limit' {
+  if (!error) return 'renderErrors.provider';
+  if (error.code === 'provider') return error.retriable ? 'renderErrors.provider' : 'renderErrors.providerFinal';
+  return `renderErrors.${error.code}`;
+}

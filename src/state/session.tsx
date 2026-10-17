@@ -115,7 +115,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const translateInput = useCallback((): TranslateInput => {
     const s = stateRef.current;
-    return { intent: s.userIntent, constraints: s.constraints, kit: s.kit, locale: localeRef.current };
+    return { intent: s.userIntent, constraints: s.constraints, kit: s.kit, locale: localeRef.current, source: s.sourceImage };
   }, []);
 
   const renderOne = useCallback(
@@ -125,8 +125,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const current = () => gen === generation.current;
       const { signal, done } = track(external);
       try {
+        const { constraints, kit } = stateRef.current;
         const job = await services.render.render(
-          { source, recipe, kind },
+          { source, recipe, kind, constraints, kit },
           (status) => {
             if (current()) dispatch({ type: 'render/status', recipeId: recipe.id, status });
           },
@@ -253,6 +254,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [cancelEditOp, invalidate]);
 
   const startOver = useCallback(() => {
+    services.endSession();
     guardedDispatch({ type: 'session/reset', sessionId: newSessionId() });
   }, [guardedDispatch]);
 

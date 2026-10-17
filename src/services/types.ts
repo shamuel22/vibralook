@@ -20,6 +20,8 @@ export interface TranslateInput {
   constraints: Constraint[];
   kit: Kit;
   locale: Locale;
+  /** The session's selfie: the backend binds every call to the session that holds it. */
+  source: SourceImage | null;
 }
 
 export type RecipeText = Pick<LookRecipe, 'tagline' | 'explanation' | 'steps'>;
@@ -37,6 +39,9 @@ export interface VibeService {
 export interface RenderRequest {
   source: SourceImage;
   recipe: LookRecipe;
+  /** Re-validated by the backend before any provider unit is spent. */
+  constraints: Constraint[];
+  kit: Kit;
   /** `variant`: one of the three initial looks. `edit`: a confirmed change in the editor. */
   kind: 'variant' | 'edit';
 }
@@ -61,6 +66,8 @@ export interface Services {
   vibe: VibeService;
   render: RenderService;
   selfie: SelfieService;
+  /** Ends the backend session now (provider tasks and the uploaded photo are deleted). Fire-and-forget. */
+  endSession(): void;
 }
 
 export class AbortError extends Error {

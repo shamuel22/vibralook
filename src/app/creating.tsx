@@ -100,6 +100,11 @@ export default function CreatingScreen() {
       retrying.current = false;
     });
   };
+  const changePhoto = () => {
+    cancelled.current = true;
+    actions.cancelInFlight();
+    router.dismissTo('/selfie');
+  };
   const cancel = () => {
     cancelled.current = true;
     actions.cancelInFlight();
@@ -111,6 +116,8 @@ export default function CreatingScreen() {
   if (state.userIntent.text.trim().length < VIBE_MIN_LENGTH) return <Redirect href="/" />;
   if (!source) return <Redirect href="/selfie" />;
   const translationError = state.translation.status === 'error';
+  // The provider found no usable face: retrying the same photo cannot help, a new one can.
+  const noFace = state.variants.some((recipe) => jobFor(state, recipe)?.error?.code === 'noFace');
   const interpreting = translating || state.translation.status === 'idle';
 
   return (
@@ -183,6 +190,7 @@ export default function CreatingScreen() {
                     variant={variant}
                     recipe={recipe}
                     status={interpreting ? 'interpreting' : (jobFor(state, recipe)?.status ?? 'pending')}
+                    error={jobFor(state, recipe)?.error}
                     animateProgress={variant === shimmerVariant}
                     onRetry={() => void actions.retryVariant(variant)}
                   />
@@ -191,6 +199,14 @@ export default function CreatingScreen() {
             })}
           </View>
         </>
+      )}
+      {noFace && (
+        <InlineNotice
+          tone="error"
+          focusOnMount
+          message={t('creating.noFaceNotice')}
+          action={{ label: t('creating.changePhoto'), onPress: changePhoto }}
+        />
       )}
       {state.variants.some((recipe) => recipe.origin === 'editorial') && (
         <InlineNotice tone="info" message={t('creating.editorialNotice')} />
