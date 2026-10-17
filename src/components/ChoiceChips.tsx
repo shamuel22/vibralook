@@ -59,6 +59,7 @@ export function ChoiceChips<T extends string | number>(props: ChoiceChipsProps<T
             accessibilityState={{ checked: active, selected: active, disabled: o.disabled }}
             disabled={o.disabled}
             onPress={() => props.onChange(o.value)}
+            transitionColors
             style={[styles.chip, active && styles.active, o.disabled && styles.disabled]}
             pressedStyle={active ? styles.activePressed : styles.pressed}
           >
@@ -89,10 +90,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.white,
-    // Includes transform so PressableScale's press scale keeps its transition.
-    transitionProperty: ['transform', 'backgroundColor', 'borderColor'],
-    transitionDuration: '140ms',
-    transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
   },
   inner: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
   active: { backgroundColor: colors.ink, borderColor: colors.ink },

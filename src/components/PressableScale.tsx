@@ -7,6 +7,8 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
+import { cssEasing } from '@/theme';
+
 export interface PressableScaleProps extends Omit<PressableProps, 'children' | 'style'> {
   children: ReactNode | ((state: { pressed: boolean }) => ReactNode);
   style?: StyleProp<ViewStyle>;
@@ -14,6 +16,8 @@ export interface PressableScaleProps extends Omit<PressableProps, 'children' | '
   containerStyle?: StyleProp<ViewStyle>;
   pressedStyle?: StyleProp<ViewStyle>;
   scaleTo?: number;
+  /** Extra style properties to transition alongside the press scale (e.g. backgroundColor). */
+  transitionColors?: boolean;
 }
 
 export function PressableScale({
@@ -22,6 +26,7 @@ export function PressableScale({
   containerStyle,
   pressedStyle,
   scaleTo = 0.97,
+  transitionColors = false,
   disabled,
   onPressIn,
   onPressOut,
@@ -50,9 +55,9 @@ export function PressableScale({
         style={[
           {
             transform: [{ scale: active && !reduceMotion ? scaleTo : 1 }],
-            transitionProperty: 'transform',
-            transitionDuration: '120ms',
-            transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
+            transitionProperty: transitionColors ? ['transform', 'backgroundColor', 'borderColor'] : 'transform',
+            transitionDuration: transitionColors ? '140ms' : '120ms',
+            transitionTimingFunction: cssEasing.press,
           },
           style,
           active && pressedStyle,

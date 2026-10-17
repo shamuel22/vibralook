@@ -10,3 +10,4 @@ export * from './RibbonAccent';
 export * from './Screen';
 export * from './SimulationSeal';
 export * from './Swatch';
+export * from './VibeComposer';

@@ -2,7 +2,7 @@
  * Design tokens — 1:1 translation of DESIGN.md §3 for React Native.
  * Never hardcode a color, spacing or duration in a component; import it from here.
  */
-import { Easing } from 'react-native-reanimated';
+import { cubicBezier, Easing } from 'react-native-reanimated';
 
 export const colors = {
   ink: '#24172B',
@@ -102,6 +102,16 @@ export const easing = {
   standard: Easing.bezier(0.22, 1, 0.36, 1),
   enter: Easing.bezier(0.16, 1, 0.3, 1),
   inOut: Easing.bezier(0.77, 0, 0.175, 1),
+} as const;
+
+/**
+ * Same curves for Reanimated CSS transitions (`transitionTimingFunction`), which do not
+ * accept `cubic-bezier()` strings.
+ */
+export const cssEasing = {
+  press: cubicBezier(0.23, 1, 0.32, 1),
+  standard: cubicBezier(0.22, 1, 0.36, 1),
+  enter: cubicBezier(0.16, 1, 0.3, 1),
 } as const;
 
 /** Springs for anything a finger drives (animate-expo table). */

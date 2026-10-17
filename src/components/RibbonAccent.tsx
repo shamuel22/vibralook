@@ -57,13 +57,17 @@ export function RibbonAccent({ placement = 'bottom', height = 140, style }: Ribb
     return () => cancelAnimation(drift);
   }, [animate, drift]);
 
-  const back = useAnimatedStyle(() => ({
-    transform: [{ translateX: -6 + drift.get() * 12 }, { rotate: '-8deg' }],
-    opacity: 0.32 + drift.get() * 0.06,
+  const a = useAnimatedStyle(() => ({
+    transform: [{ translateX: -6 + drift.get() * 12 }, { rotate: '-9deg' }],
+    opacity: 0.34 + drift.get() * 0.08,
   }));
-  const front = useAnimatedStyle(() => ({
-    transform: [{ translateX: 4 - drift.get() * 8 }, { rotate: '6deg' }],
-    opacity: 0.42 - drift.get() * 0.06,
+  const b = useAnimatedStyle(() => ({
+    transform: [{ translateX: 5 - drift.get() * 10 }, { rotate: '5deg' }],
+    opacity: 0.46 - drift.get() * 0.08,
+  }));
+  const c = useAnimatedStyle(() => ({
+    transform: [{ translateX: -3 + drift.get() * 6 }, { rotate: '-3deg' }],
+    opacity: 0.3 + drift.get() * 0.06,
   }));
 
   return (
@@ -73,19 +77,26 @@ export function RibbonAccent({ placement = 'bottom', height = 140, style }: Ribb
       importantForAccessibility="no-hide-descendants"
       style={[styles.wrap, placement === 'bottom' ? styles.bottom : styles.top, { height }, style]}
     >
-      <Animated.View style={[styles.band, styles.bandBack, back]}>
+      <Animated.View style={[styles.band, { height: height * 0.42, bottom: height * 0.28 }, a]}>
         <LinearGradient
-          colors={[colors.orchid, colors.rose, colors.cream]}
-          locations={[0, 0.6, 1]}
+          colors={[colors.orchid, colors.rose]}
           start={ribbon.start}
           end={ribbon.end}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
-      <Animated.View style={[styles.band, styles.bandFront, front]}>
+      <Animated.View style={[styles.band, { height: height * 0.34, bottom: height * 0.04 }, b]}>
         <LinearGradient
           colors={ribbon.colors}
           locations={ribbon.locations}
+          start={ribbon.start}
+          end={ribbon.end}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+      <Animated.View style={[styles.band, { height: height * 0.22, bottom: -height * 0.06 }, c]}>
+        <LinearGradient
+          colors={[colors.rose, colors.coral]}
           start={ribbon.start}
           end={ribbon.end}
           style={StyleSheet.absoluteFill}
@@ -99,7 +110,5 @@ const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, overflow: 'hidden' },
   bottom: { bottom: 0 },
   top: { top: 0 },
-  band: { position: 'absolute', left: '-20%', width: '140%', borderRadius: 999, overflow: 'hidden' },
-  bandBack: { height: '70%', bottom: '-18%' },
-  bandFront: { height: '55%', bottom: '-30%' },
+  band: { position: 'absolute', left: '-25%', width: '150%', borderRadius: 999, overflow: 'hidden' },
 });

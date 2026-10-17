@@ -2,12 +2,24 @@
  * Dev gallery — QA surface for tokens, type, shades, mock knobs and (from Etapa 2)
  * every component state. Not linked from the product UI except the dev menu entry.
  */
-import { Stack } from 'expo-router';
-import { useSyncExternalStore } from 'react';
+import { Link, Stack } from 'expo-router';
+import { Camera, Clock, Image as ImageIcon, SlidersHorizontal, Sun } from 'lucide-react-native';
+import { useState, useSyncExternalStore } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText } from '@/components/AppText';
+import {
+  AppText,
+  ArtPlaceholder,
+  BrandHeader,
+  Button,
+  ChoiceChips,
+  EditorialHeading,
+  InlineNotice,
+  RibbonAccent,
+  SimulationSeal,
+  Swatch,
+} from '@/components';
 import { shadesForZone } from '@/domain/shades';
 import { VARIANTS, ZONES, type SelfieIssue } from '@/domain/types';
 import { useI18n, type TKey } from '@/i18n';
@@ -55,12 +67,116 @@ function Toggle({ label, on, onPress }: { label: string; on: boolean; onPress: (
 export default function DevGallery() {
   const { t, locale, setLocale } = useI18n();
   const mock = useSyncExternalStore(subscribeMockSettings, getMockSettings);
+  const [time, setTime] = useState<5 | 10 | 20>(10);
+  const [limits, setLimits] = useState<string[]>(['noShine']);
+  const [picked, setPicked] = useState('lip-mauve');
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <Stack.Screen options={{ title: 'Dev gallery' }} />
       <ScrollView contentContainerStyle={styles.body}>
         <AppText variant="h1">Galería dev</AppText>
+
+        <Link href="/dev/components" style={styles.linkOut}>
+          <AppText variant="bodyStrong">Componentes compuestos (Codex) →</AppText>
+        </Link>
+
+        <Section title="BrandHeader">
+          <View style={styles.frame}>
+            <BrandHeader stage="kit" />
+          </View>
+          <View style={styles.frame}>
+            <BrandHeader hideBack />
+          </View>
+          <View style={styles.frame}>
+            <BrandHeader backLocked stage="looks" />
+          </View>
+        </Section>
+
+        <Section title="EditorialHeading">
+          <EditorialHeading title={t('intent.title')} subtitle={t('intent.subtitle')} />
+          <EditorialHeading level={2} title={t('looks.title')} subtitle={t('looks.subtitle')} />
+        </Section>
+
+        <Section title="Botones">
+          <Button label={t('intent.cta')} onPress={() => {}} />
+          <Button label={t('selfie.prepare.openCamera')} icon={Camera} onPress={() => {}} />
+          <Button variant="secondary" label={t('selfie.prepare.uploadPhoto')} icon={ImageIcon} onPress={() => {}} />
+          <Button label={t('result.save')} loading loadingLabel={t('result.saving')} onPress={() => {}} />
+          <Button label={t('looks.choose')} disabled onPress={() => {}} />
+          <Button variant="secondary" label={t('kit.skip')} disabled onPress={() => {}} />
+          <View style={styles.row}>
+            <Button compact variant="secondary" arrow={false} label={t('edit.keep', { zone: t('kit.zones.eyes') })} onPress={() => {}} />
+            <Button compact arrow={false} label={t('edit.seeChange')} onPress={() => {}} />
+          </View>
+        </Section>
+
+        <Section title="ChoiceChips">
+          <ChoiceChips
+            label={t('intent.timeLabel')}
+            value={time}
+            onChange={setTime}
+            options={[5, 10, 20].map((m) => ({ value: m as 5 | 10 | 20, label: t('common.minutes', { count: m }), icon: Clock }))}
+          />
+          <ChoiceChips
+            label={t('intent.intensityLabel')}
+            value="balanced"
+            onChange={() => {}}
+            options={(['subtle', 'balanced', 'expressive'] as const).map((v) => ({
+              value: v,
+              label: t(`intent.intensity.${v}`),
+              icon: SlidersHorizontal,
+            }))}
+          />
+          <ChoiceChips<string>
+            multiple
+            label={t('intent.constraintsLabel')}
+            value={limits}
+            onChange={(v) => setLimits((l) => (l.includes(v) ? l.filter((x) => x !== v) : [...l, v]))}
+            options={[
+              { value: 'noShadow', label: t('intent.constraints.noShadow') },
+              { value: 'noShine', label: t('intent.constraints.noShine'), icon: Sun },
+              { value: 'discreetLips', label: t('intent.constraints.discreetLips'), disabled: true, disabledReason: 'Ejemplo inhabilitado' },
+            ]}
+          />
+        </Section>
+
+        <Section title="Swatch">
+          <View style={styles.wrap}>
+            {['lip-dusty-pink', 'lip-mauve', 'lip-cherry', 'lip-wine'].map((id) => (
+              <Swatch key={id} shadeId={id} selected={picked === id} onPress={() => setPicked(id)} />
+            ))}
+            <Swatch shadeId="lip-plum" disabled disabledReason="Bloqueado" onPress={() => {}} />
+          </View>
+          <View style={styles.wrap}>
+            <Swatch shadeId="eye-smoky-plum" size="sm" />
+            <Swatch shadeId="lip-wine" size="sm" />
+            <Swatch shadeId="cheek-brick-rose" size="sm" />
+            <Swatch shadeId="eye-lavender" size="lg" />
+          </View>
+        </Section>
+
+        <Section title="InlineNotice">
+          <InlineNotice tone="privacy" message={t('selfie.prepare.privacy')} />
+          <InlineNotice tone="info" message={t('kit.approximation')} />
+          <InlineNotice tone="success" message={t('edit.summaryOne', { kept: 'los ojos y las mejillas', changed: 'los labios' })} />
+          <InlineNotice tone="error" message={t('creating.statusError')} action={{ label: t('looks.retry'), onPress: () => {} }} />
+        </Section>
+
+        <Section title="ArtPlaceholder + SimulationSeal">
+          <ArtPlaceholder id="vl_intencion_escena_jazz_v01" aspectRatio={16 / 9} />
+          <View style={styles.row}>
+            <ArtPlaceholder id="vl_creacion_textura_susurro_v01" aspectRatio={1} compact style={styles.thumb} />
+            <SimulationSeal />
+          </View>
+          <SimulationSeal compact />
+        </Section>
+
+        <Section title="RibbonAccent">
+          <View style={styles.ribbonFrame}>
+            <RibbonAccent />
+          </View>
+        </Section>
 
         <Section title="Idioma">
           <View style={styles.row}>
@@ -178,4 +294,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   toggleOn: { backgroundColor: colors.ink },
+  linkOut: { padding: space[4], borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white },
+  frame: { borderWidth: 1, borderColor: colors.line, borderRadius: radius.sm },
+  thumb: { width: 88 },
+  ribbonFrame: { height: 160, borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.cream, borderWidth: 1, borderColor: colors.line },
 });
