@@ -34,6 +34,7 @@ export type Action =
   | { type: 'kit/finish'; zone: Zone; shadeId: string; finish: Finish }
   | { type: 'kit/skip' }
   | { type: 'kit/declare' }
+  | { type: 'looks/reset' }
   | { type: 'translate/start' }
   | { type: 'translate/success'; variants: LookRecipe[] }
   | { type: 'translate/error'; retriable: boolean }
@@ -127,6 +128,8 @@ export function reducer(s: SessionState, a: Action): SessionState {
     case 'kit/declare':
       return { ...s, kit: { ...s.kit, status: 'declared' } };
 
+    case 'looks/reset':
+      return clearLooks(s);
     case 'translate/start':
       return { ...clearLooks(s), translation: { status: 'loading' } };
     case 'translate/success': {
