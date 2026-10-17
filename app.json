@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "VIBRA LOOK",
+    "slug": "vibralook",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/icon.png",
+    "scheme": "vibralook",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FFF8F2",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vibralook.app",
+      "infoPlist": {
+        "CADisableMinimumFrameDurationOnPhone": true
+      }
+    },
+    "android": {
+      "package": "com.vibralook.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#24172B",
+        "foregroundImage": "./assets/brand/adaptive-foreground.png",
+        "monochromeImage": "./assets/brand/adaptive-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-localization",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#24172B",
+          "image": "./assets/brand/adaptive-foreground.png",
+          "imageWidth": 200
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "VIBRA LOOK uses the camera to take the selfie where your looks are tried on.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "VIBRA LOOK lets you choose a photo to try your looks on.",
+          "cameraPermission": "VIBRA LOOK uses the camera to take the selfie where your looks are tried on.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "VIBRA LOOK saves your look card to your photos when you ask it to.",
+          "savePhotosPermission": "VIBRA LOOK saves your look card to your photos when you ask it to.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

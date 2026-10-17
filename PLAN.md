@@ -33,6 +33,7 @@ Fuentes de verdad: `BRIEF_VIBRA_CONCURSO_YOUCAM_2026.md` (comportamiento) y `DES
 | --- | --- | --- |
 | Framework | **Expo SDK 58 + Expo Router + TypeScript** | El brief exige Expo; Router da rutas por pantalla y acceso directo a cada estado para QA. |
 | Plataformas | **iOS y Android únicamente** (Expo Go durante desarrollo; development build si alguna librería lo requiere) | Decisión del equipo: solo app móvil. |
+| Nota de dependencias | `react-dom` está fijado a la versión de `react` solo porque es *peer dependency* de módulos internos de Expo Router; **no** implica un objetivo web. | Sin él, npm resuelve un `react-dom` incompatible. |
 | Estilos | `StyleSheet` + módulo de tokens `src/theme/tokens.ts` (traducción 1:1 de DESIGN §3) | Sin librerías de UI externas: control total de la identidad. |
 | Fuentes | `@expo-google-fonts/fraunces` y `@expo-google-fonts/manrope` | Tipografías indicadas en DESIGN §2. |
 | Animación | `react-native-reanimated` (incluido en el template de Expo) | Necesario para el slider antes/después fluido, crossfade y escalonado; respeta `useReducedMotion`. Se justifica por DESIGN §6. |
@@ -50,7 +51,7 @@ La implementación `mock` **no dibuja maquillaje** sobre la foto ni usa las lám
 ### Estructura prevista
 
 ```
-app/                      # Expo Router
+src/app/                  # Expo Router (SDK 58 template usa src/app)
   _layout.tsx             # fuentes, providers, i18n, tema
   index.tsx               # 1 Intención
   selfie/index.tsx        # 2 Preparar selfie
@@ -63,13 +64,12 @@ app/                      # Expo Router
   result.tsx              # 9 Resultado
   dev/gallery.tsx         # Galería de componentes y estados (solo dev, para QA)
 src/
+  domain/                 # tipos, biblioteca de tonos, reglas de restricciones, helpers de receta
   theme/                  # tokens, tipografía, motion
   components/             # BrandHeader, PrimaryButton, ChoiceChips, … (DESIGN §5)
-  state/                  # session store, tipos LookRecipe, reducer, selectores
+  state/                  # reducer, SessionProvider (orquestación async), selectores
   services/               # interfaces + mock (translate, render, selfieCheck)
-  data/                   # biblioteca de muestras del kit (nombre accesible + hex + acabado)
   i18n/                   # es.ts, en.ts, hook useT
-  utils/                  # restricciones, validaciones, accesibilidad
 assets/brand/             # logo e icono aprobados
 assets/art/               # (vacío) artes finales del equipo gráfico cuando lleguen
 ```
@@ -210,4 +210,5 @@ codex exec -C /home/lu/vibralook -s workspace-write \
 | Fecha | Etapa | Estado | Notas |
 | --- | --- | --- | --- |
 | 2026-10-17 | Exploración y plan | ✅ | Plan creado. |
-| 2026-10-17 | Ajuste de alcance | ✅ | Solo app móvil Expo (sin web). Remoto GitHub `shamuel22/vibralook` añadido al flujo; esperando señal para iniciar Etapa 1. |
+| 2026-10-17 | Ajuste de alcance | ✅ | Solo app móvil Expo (sin web). Remoto GitHub `shamuel22/vibralook` añadido al flujo. |
+| 2026-10-17 | Etapa 1 — Fundaciones | ✅ | Expo SDK 58 + Router + TS; tokens, tipografía, i18n ES/EN, modelo de dominio, reducer + SessionProvider, servicios mock con knobs, recursos de marca, rutas provisionales, galería dev, `AGENTS.md`. typecheck/lint limpios; bundles iOS/Android compilan. Pendiente: verificación visual en emulador (no hay AVD instalado). |
