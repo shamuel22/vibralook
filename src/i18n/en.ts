@@ -20,6 +20,18 @@ const en: Dictionary = {
     minutes: '{count} min',
     optional: 'Optional',
   },
+  onboarding: {
+    eyebrow: 'From vibe to look',
+    title: 'How you want to feel, on your own face',
+    body: 'Describe a feeling or an occasion. We show you three ways to wear it on your photo, plus the steps to do it today.',
+    step1Title: 'Tell us your vibe',
+    step1Body: 'In your own words: a scene, a feeling, an occasion.',
+    step2Title: 'See three takes',
+    step2Body: 'Whisper, Balance and Statement, all on the same selfie.',
+    step3Title: 'Make it yours',
+    step3Body: 'Change one area without losing what you love, and take the steps with you.',
+    cta: 'Get started',
+  },
   stages: {
     vibe: 'Vibe',
     selfie: 'Selfie',
@@ -38,6 +50,7 @@ const en: Dictionary = {
     photoUseBody:
       'Your photo is used to create the virtual try-on. It is processed by the try-on provider and is not kept after your session.',
     devGallery: 'Component gallery (dev)',
+    intro: 'See the intro',
   },
   intent: {
     title: 'What vibe do you want to give off?',
@@ -66,6 +79,10 @@ const en: Dictionary = {
     },
     constraintsLabel: 'Limits',
     constraintsHint: 'Optional. Pick as many as you like.',
+    constraintsNone: 'None',
+    examplesSummary: '3 ideas',
+    optionsHint: 'Tap to show or hide the options.',
+    adjustLabel: 'Fine-tune if you like',
     constraints: {
       noShadow: 'No eyeshadow',
       noShine: 'No shine',

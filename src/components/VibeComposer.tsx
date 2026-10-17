@@ -1,7 +1,7 @@
 /**
- * VibeComposer (DESIGN §5): free text with editable examples and a reasonable limit.
- * States: empty, valid, error. Picking an example fills the field (still editable) and
- * shows that example's scene artwork slot; typing freely hides it.
+ * VibeComposer (DESIGN §5): free text with a reasonable limit. States: empty, valid, error.
+ * When the text matches an example (see `VibeExamples`), the card shows that example's
+ * scene artwork slot; typing freely hides it.
  */
 import { PencilLine } from 'lucide-react-native';
 import { useEffect, useRef, type ComponentRef } from 'react';
@@ -107,33 +107,37 @@ export function VibeComposer({ value, onChange, error, errorAttempt }: VibeCompo
           </AppText>
         </View>
       ) : null}
+    </View>
+  );
+}
 
-      <View style={styles.examples}>
-        <AppText variant="labelStrong">{t('intent.examplesLabel')}</AppText>
-        <View style={styles.exampleRow}>
-          {VIBE_EXAMPLES.map((e) => {
-            const label = t(`intent.examples.${e}`);
-            const active = activeExample === e;
-            return (
-              <PressableScale
-                key={e}
-                accessibilityRole="button"
-                accessibilityLabel={label}
-                accessibilityHint={t('intent.editExample')}
-                accessibilityState={{ selected: active }}
-                onPress={() => onChange(label)}
-                transitionColors
-                style={[styles.example, active && styles.exampleActive]}
-                pressedStyle={styles.examplePressed}
-              >
-                <AppText variant="labelStrong" color={colors.ink}>
-                  {label}
-                </AppText>
-              </PressableScale>
-            );
-          })}
-        </View>
-      </View>
+/** Editable example vibes; picking one fills the field (still editable). */
+export function VibeExamples({ value, onChange }: { value: string; onChange: (text: string) => void }) {
+  const t = useT();
+  const activeExample = VIBE_EXAMPLES.find((e) => t(`intent.examples.${e}`) === value.trim());
+  return (
+    <View style={styles.exampleRow}>
+      {VIBE_EXAMPLES.map((e) => {
+        const label = t(`intent.examples.${e}`);
+        const active = activeExample === e;
+        return (
+          <PressableScale
+            key={e}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            accessibilityHint={t('intent.editExample')}
+            accessibilityState={{ selected: active }}
+            onPress={() => onChange(label)}
+            transitionColors
+            style={[styles.example, active && styles.exampleActive]}
+            pressedStyle={styles.examplePressed}
+          >
+            <AppText variant="labelStrong" color={colors.ink}>
+              {label}
+            </AppText>
+          </PressableScale>
+        );
+      })}
     </View>
   );
 }
@@ -160,7 +164,6 @@ const styles = StyleSheet.create({
     padding: 0,
     textAlignVertical: 'top',
   },
-  examples: { gap: space[2], marginTop: space[2] },
   exampleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   example: {
     minHeight: layout.minTouch,

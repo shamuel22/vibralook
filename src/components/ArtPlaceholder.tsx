@@ -15,6 +15,7 @@ import { colors, radius, space } from '@/theme';
 import { AppText } from './AppText';
 
 export type ArtId =
+  | 'vl_onboarding_hero_v01'
   | 'vl_intencion_escena_jazz_v01'
   | 'vl_intencion_escena_sakura_v01'
   | 'vl_intencion_escena_reunion_v01'

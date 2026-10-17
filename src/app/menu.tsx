@@ -3,7 +3,7 @@
  * and the dev gallery in development builds. Presented as a native form sheet.
  */
 import { router } from 'expo-router';
-import { Globe, Info, RotateCcw, Wrench } from 'lucide-react-native';
+import { Globe, Info, RotateCcw, BookOpen, Wrench } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -90,6 +90,14 @@ export default function MenuSheet() {
           onPress={() => setShowPhotoUse((v) => !v)}
         />
         {showPhotoUse && <InlineNotice tone="privacy" message={t('menu.photoUseBody')} />}
+        <Row
+          icon={BookOpen}
+          label={t('menu.intro')}
+          onPress={() => {
+            router.back();
+            router.push('/welcome');
+          }}
+        />
         <Row icon={RotateCcw} label={t('menu.startOver')} onPress={startOver} />
         {__DEV__ && (
           <Row

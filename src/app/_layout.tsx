@@ -9,6 +9,7 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { I18nProvider } from '@/i18n';
+import { OnboardingProvider } from '@/state/onboarding';
 import { SessionProvider } from '@/state/session';
 import { colors, fontAssets } from '@/theme';
 
@@ -30,36 +31,39 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <KeyboardProvider>
           <I18nProvider>
-            <SessionProvider>
-              <StatusBar style="dark" />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.cream },
-                  // Platform push by default; a plain fade when the OS asks for reduced motion.
-                  animation: reduceMotion ? 'fade' : 'default',
-                }}
-              >
-                <Stack.Screen
-                  name="selfie/camera"
-                  options={{
-                    animation: reduceMotion ? 'fade' : 'slide_from_bottom',
-                    animationMatchesGesture: true,
-                  }}
-                />
-                <Stack.Screen name="creating" options={{ gestureEnabled: false }} />
-                <Stack.Screen
-                  name="menu"
-                  options={{
-                    presentation: 'formSheet',
-                    sheetAllowedDetents: 'fitToContents',
-                    sheetGrabberVisible: true,
-                    sheetCornerRadius: 24,
+            <OnboardingProvider>
+              <SessionProvider>
+                <StatusBar style="dark" />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
                     contentStyle: { backgroundColor: colors.cream },
+                    // Platform push by default; a plain fade when the OS asks for reduced motion.
+                    animation: reduceMotion ? 'fade' : 'default',
                   }}
-                />
-              </Stack>
-            </SessionProvider>
+                >
+                  <Stack.Screen
+                    name="selfie/camera"
+                    options={{
+                      animation: reduceMotion ? 'fade' : 'slide_from_bottom',
+                      animationMatchesGesture: true,
+                    }}
+                  />
+                  <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
+                  <Stack.Screen name="creating" options={{ gestureEnabled: false }} />
+                  <Stack.Screen
+                    name="menu"
+                    options={{
+                      presentation: 'formSheet',
+                      sheetAllowedDetents: 'fitToContents',
+                      sheetGrabberVisible: true,
+                      sheetCornerRadius: 24,
+                      contentStyle: { backgroundColor: colors.cream },
+                    }}
+                  />
+                </Stack>
+              </SessionProvider>
+            </OnboardingProvider>
           </I18nProvider>
         </KeyboardProvider>
       </SafeAreaProvider>

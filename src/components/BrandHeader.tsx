@@ -121,7 +121,8 @@ const styles = StyleSheet.create({
     paddingBottom: space[1],
   },
   dots: { flexDirection: 'row', gap: space[1] },
-  progressText: { flex: 1, minWidth: 0 },
+  // Shrinks and wraps at large text, but stays centered with the dots.
+  progressText: { flexShrink: 1, minWidth: 0 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.line },
   dotDone: { backgroundColor: colors.rose },
   dotCurrent: { width: 16, backgroundColor: colors.ink },

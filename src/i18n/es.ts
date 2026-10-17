@@ -19,6 +19,18 @@ const es = {
     minutes: '{count} min',
     optional: 'Opcional',
   },
+  onboarding: {
+    eyebrow: 'De la vibra al look',
+    title: 'Cómo te quieres sentir, en tu propio rostro',
+    body: 'Describe una sensación o una ocasión. Te mostramos tres maneras de llevarla en tu foto y los pasos para hacerlo hoy.',
+    step1Title: 'Cuéntanos tu vibra',
+    step1Body: 'Con tus palabras: una escena, una emoción, una ocasión.',
+    step2Title: 'Mira tres interpretaciones',
+    step2Body: 'Susurro, Equilibrio y Declaración, sobre tu misma selfie.',
+    step3Title: 'Hazlo tuyo',
+    step3Body: 'Ajusta una zona sin perder lo que te gusta y llévate los pasos.',
+    cta: 'Empezar',
+  },
   stages: {
     vibe: 'Vibra',
     selfie: 'Selfie',
@@ -37,6 +49,7 @@ const es = {
     photoUseBody:
       'Tu foto se usa para crear la prueba virtual. La procesa el proveedor de la prueba virtual y no se conserva después de tu sesión.',
     devGallery: 'Galería de componentes (dev)',
+    intro: 'Ver introducción',
   },
   intent: {
     title: '¿Qué vibra quieres transmitir?',
@@ -65,6 +78,10 @@ const es = {
     },
     constraintsLabel: 'Límites',
     constraintsHint: 'Opcional. Puedes elegir varios.',
+    constraintsNone: 'Ninguno',
+    examplesSummary: '3 ideas',
+    optionsHint: 'Toca para mostrar u ocultar las opciones.',
+    adjustLabel: 'Ajusta si quieres',
     constraints: {
       noShadow: 'Sin sombra',
       noShine: 'Sin brillo',
