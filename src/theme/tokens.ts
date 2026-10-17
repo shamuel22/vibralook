@@ -20,6 +20,13 @@ export const colors = {
   inkScrim: 'rgba(36, 23, 43, 0.72)',
   /** Soft surface for notices and the selected-state wash. */
   creamDeep: '#F7ECE6',
+  /** Pressed surface of primary (ink) buttons. */
+  inkPressed: '#3A2843',
+  /** Notice surfaces: always paired with icon + text in the matching functional color. */
+  errorSoft: '#FBEDEE',
+  errorLine: '#EBC5CA',
+  successSoft: '#ECF4EF',
+  successLine: '#C6DCCF',
 } as const;
 
 /** `--vl-ribbon`: 115deg orchid → rose → coral. Use with expo-linear-gradient. */

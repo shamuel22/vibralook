@@ -40,6 +40,16 @@ export default function RootLayout() {
             >
               <Stack.Screen name="selfie/camera" options={{ animation: reduceMotion ? 'fade' : 'slide_from_bottom' }} />
               <Stack.Screen name="creating" options={{ gestureEnabled: false }} />
+              <Stack.Screen
+                name="menu"
+                options={{
+                  presentation: 'formSheet',
+                  sheetAllowedDetents: 'fitToContents',
+                  sheetGrabberVisible: true,
+                  sheetCornerRadius: 24,
+                  contentStyle: { backgroundColor: colors.cream },
+                }}
+              />
             </Stack>
           </SessionProvider>
         </I18nProvider>
