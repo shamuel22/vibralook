@@ -7,16 +7,7 @@
  *  - A confirmed edit is validated against constraints/kit BEFORE rendering (no units spent).
  *  - Text, palette and steps of an edit are regenerated from the same recipe that is rendered.
  */
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 
 import { recipeViolations, type Violation } from '@/domain/constraints';
 import type { LookRecipe, SessionState, SourceImage, VariantKey } from '@/domain/types';
@@ -42,6 +33,8 @@ export interface SessionActions {
   retryVariant: (variant: VariantKey) => Promise<void>;
   /** Validate, describe and render the current draft. Returns violations if blocked. */
   applyDraft: () => Promise<Violation[]>;
+  /** Abandon an in-flight edit; the last valid look stays. */
+  cancelEdit: () => void;
   /** Abort in-flight translation and renders (keeps intent, selfie and kit). */
   cancelInFlight: () => void;
   startOver: () => void;
@@ -69,11 +62,56 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [locale]);
 
   const controllers = useRef(new Set<AbortController>());
-  const track = useCallback(() => {
+  const track = useCallback((external?: AbortSignal) => {
     const c = new AbortController();
+    external?.addEventListener('abort', () => c.abort());
     controllers.current.add(c);
     return { signal: c.signal, done: () => controllers.current.delete(c) };
   }, []);
+  const abortAll = useCallback(() => {
+    controllers.current.forEach((c) => c.abort());
+    controllers.current.clear();
+  }, []);
+
+  /**
+   * Generation of the current inputs (selfie + intent + kit → looks). Any async completion
+   * from an older generation is dropped, so a late result can never overwrite newer work.
+   */
+  const generation = useRef(0);
+  const invalidate = useCallback(() => {
+    generation.current += 1;
+    abortAll();
+  }, [abortAll]);
+
+  /** Edit operations: a synchronous lock plus an id, so a double tap or a stale edit can't land. */
+  const editOp = useRef(0);
+  const editBusy = useRef(false);
+  const editAbort = useRef<AbortController | null>(null);
+  const cancelEditOp = useCallback(() => {
+    editOp.current += 1;
+    editBusy.current = false;
+    editAbort.current?.abort();
+    editAbort.current = null;
+  }, []);
+
+  /** Dispatch used by screens: actions that change the generation inputs cancel obsolete work first. */
+  const guardedDispatch = useCallback(
+    (a: Action) => {
+      if (
+        a.type === 'looks/reset' ||
+        a.type === 'selfie/set' ||
+        a.type === 'selfie/clear' ||
+        a.type === 'session/reset'
+      ) {
+        cancelEditOp();
+        invalidate();
+      } else if (a.type === 'looks/choose') {
+        cancelEditOp();
+      }
+      dispatch(a);
+    },
+    [cancelEditOp, invalidate],
+  );
 
   const translateInput = useCallback((): TranslateInput => {
     const s = stateRef.current;
@@ -81,20 +119,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const renderOne = useCallback(
-    async (recipe: LookRecipe, kind: 'variant' | 'edit') => {
+    async (recipe: LookRecipe, kind: 'variant' | 'edit', gen: number, external?: AbortSignal) => {
       const source = stateRef.current.sourceImage;
       if (!source) throw new Error('No source image');
-      const { signal, done } = track();
+      const current = () => gen === generation.current;
+      const { signal, done } = track(external);
       try {
         const job = await services.render.render(
           { source, recipe, kind },
-          (status) => dispatch({ type: 'render/status', recipeId: recipe.id, status }),
+          (status) => {
+            if (current()) dispatch({ type: 'render/status', recipeId: recipe.id, status });
+          },
           signal,
         );
+        if (!current()) return null;
         dispatch({ type: 'render/done', job });
         return job;
       } catch (e) {
-        if (isAbort(e)) return null;
+        if (isAbort(e) || !current()) return null;
         const job = {
           recipeId: recipe.id,
           status: 'error' as const,
@@ -113,90 +155,143 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const submitSelfie = useCallback(
     async (image: Omit<SourceImage, 'check'>) => {
       const withCheck: SourceImage = { ...image, check: { status: 'checking' } };
-      dispatch({ type: 'selfie/set', image: withCheck });
+      guardedDispatch({ type: 'selfie/set', image: withCheck });
+      const gen = generation.current;
       const { signal, done } = track();
       try {
         const result = await services.selfie.check(withCheck, signal);
-        dispatch({ type: 'selfie/checked', result });
+        if (gen === generation.current) dispatch({ type: 'selfie/checked', result });
       } catch (e) {
-        if (!isAbort(e)) dispatch({ type: 'selfie/checked', result: { status: 'invalid', issue: 'unsupported' } });
+        if (!isAbort(e) && gen === generation.current)
+          dispatch({ type: 'selfie/checked', result: { status: 'invalid', issue: 'unsupported' } });
       } finally {
         done();
       }
     },
-    [track],
+    [guardedDispatch, track],
   );
 
   const startLooks = useCallback(async () => {
+    cancelEditOp();
+    invalidate();
+    const gen = generation.current;
     dispatch({ type: 'translate/start' });
     const { signal, done } = track();
     let variants: LookRecipe[];
     try {
       variants = await services.vibe.translate(translateInput(), signal);
     } catch (e) {
-      if (!isAbort(e)) dispatch({ type: 'translate/error', retriable: true });
+      if (!isAbort(e) && gen === generation.current) dispatch({ type: 'translate/error', retriable: true });
       return;
     } finally {
       done();
     }
+    if (gen !== generation.current) return;
     dispatch({ type: 'translate/success', variants });
     // Independent jobs: results arrive in any order and render as they come.
-    await Promise.all(variants.map((v) => renderOne(v, 'variant')));
-  }, [renderOne, track, translateInput]);
+    await Promise.all(variants.map((v) => renderOne(v, 'variant', gen)));
+  }, [cancelEditOp, invalidate, renderOne, track, translateInput]);
 
   const retryVariant = useCallback(
     async (variant: VariantKey) => {
       const recipe = stateRef.current.variants.find((v) => v.variant === variant);
-      if (recipe) await renderOne(recipe, 'variant');
+      if (recipe) await renderOne(recipe, 'variant', generation.current);
     },
     [renderOne],
   );
 
   const applyDraft = useCallback(async (): Promise<Violation[]> => {
+    // Synchronous lock: a second tap before React re-renders is a no-op.
+    if (editBusy.current) return [];
     const s = stateRef.current;
     const draft = s.draftRecipe;
-    if (!draft || s.edit.applyingId) return [];
+    if (!draft || !s.selectedRecipe || s.edit.applyingId) return [];
     const violations = recipeViolations(draft, s.constraints, s.kit);
     if (violations.length > 0) return violations;
 
-    const { signal, done } = track();
-    let described: LookRecipe;
+    editBusy.current = true;
+    const op = ++editOp.current;
+    const gen = generation.current;
+    const stale = () => op !== editOp.current || gen !== generation.current;
+    const abort = new AbortController();
+    editAbort.current = abort;
+    // Lock the editor for the whole operation (describe + render), not only the render.
+    dispatch({ type: 'edit/applyStart', recipe: draft });
+    const { signal, done } = track(abort.signal);
     try {
       const text = await services.vibe.describe(draft, translateInput(), signal);
-      described = { ...draft, ...text };
+      if (stale()) return [];
+      const described: LookRecipe = { ...draft, ...text };
+      dispatch({ type: 'edit/described', recipe: described });
+      const job = await renderOne(described, 'edit', gen, abort.signal);
+      if (stale()) return [];
+      if (job?.status === 'success') dispatch({ type: 'edit/applySuccess', recipe: described });
+      else if (job) dispatch({ type: 'edit/applyError' });
     } catch (e) {
-      if (!isAbort(e)) dispatch({ type: 'edit/applyError' });
-      return [];
+      if (!isAbort(e) && !stale()) dispatch({ type: 'edit/applyError' });
     } finally {
       done();
+      if (op === editOp.current) {
+        editBusy.current = false;
+        editAbort.current = null;
+      }
     }
-    dispatch({ type: 'edit/applyStart', recipe: described });
-    const job = await renderOne(described, 'edit');
-    if (job?.status === 'success') dispatch({ type: 'edit/applySuccess', recipe: described });
-    else if (job) dispatch({ type: 'edit/applyError' });
     return [];
   }, [renderOne, track, translateInput]);
 
+  /** Abandon an in-flight edit (e.g. leaving the editor); the last valid look stays. */
+  const cancelEdit = useCallback(() => {
+    if (!editBusy.current && !stateRef.current.edit.applyingId) return;
+    cancelEditOp();
+    dispatch({ type: 'edit/cancelApply' });
+  }, [cancelEditOp]);
+
   const cancelInFlight = useCallback(() => {
-    controllers.current.forEach((c) => c.abort());
-    controllers.current.clear();
+    cancelEditOp();
+    invalidate();
     dispatch({ type: 'session/cancelRenders' });
-  }, []);
+  }, [cancelEditOp, invalidate]);
 
   const startOver = useCallback(() => {
-    controllers.current.forEach((c) => c.abort());
-    controllers.current.clear();
-    dispatch({ type: 'session/reset', sessionId: newSessionId() });
-  }, []);
+    guardedDispatch({ type: 'session/reset', sessionId: newSessionId() });
+  }, [guardedDispatch]);
 
   useEffect(() => {
     const set = controllers.current;
     return () => set.forEach((c) => c.abort());
   }, []);
 
+  // Language switch: regenerate the text of every stored recipe in the new language.
+  // Recipe ids (and therefore their images) don't change; only tagline, explanation and steps.
+  const lastLocale = useRef(locale);
+  useEffect(() => {
+    if (lastLocale.current === locale) return;
+    lastLocale.current = locale;
+    const s = stateRef.current;
+    const all = [...s.variants, s.selectedRecipe, s.previousRecipe, s.finalRecipe, s.draftRecipe];
+    const recipes = [...new Map(all.filter((r): r is LookRecipe => r !== null).map((r) => [r.id, r])).values()];
+    if (recipes.length === 0) return;
+    const gen = generation.current;
+    const input: TranslateInput = { ...translateInput(), locale };
+    Promise.all(recipes.map(async (r) => [r.id, await services.vibe.describe(r, input)] as const))
+      .then((entries) => {
+        if (gen === generation.current) dispatch({ type: 'recipes/retext', texts: Object.fromEntries(entries) });
+      })
+      .catch(() => {});
+  }, [locale, translateInput]);
+
   const actions = useMemo<SessionActions>(
-    () => ({ dispatch, submitSelfie, startLooks, retryVariant, applyDraft, cancelInFlight, startOver }),
-    [submitSelfie, startLooks, retryVariant, applyDraft, cancelInFlight, startOver],
+    () => ({
+      dispatch: guardedDispatch,
+      submitSelfie,
+      startLooks,
+      retryVariant,
+      applyDraft,
+      cancelEdit,
+      cancelInFlight,
+      startOver,
+    }),
+    [guardedDispatch, submitSelfie, startLooks, retryVariant, applyDraft, cancelEdit, cancelInFlight, startOver],
   );
   const value = useMemo(() => ({ state, actions }), [state, actions]);
 

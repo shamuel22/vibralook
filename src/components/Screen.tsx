@@ -3,9 +3,13 @@
  * max 560pt, and an optional sticky footer for the primary CTA (bottom safe area included).
  * Entrance: opacity + 8px rise over 360ms (DESIGN §6); none with reduced motion.
  */
-import type { ReactNode } from 'react';
+import { createContext, useCallback, useContext, useRef, type ComponentRef, type ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import {
+  KeyboardAvoidingView,
+  KeyboardAwareScrollView,
+  type KeyboardAwareScrollViewRef,
+} from 'react-native-keyboard-controller';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,6 +22,10 @@ const SCREEN_ENTER = FadeInDown.duration(motion.emphasis)
   .withInitialValues({
     transform: [{ translateY: space[2] }],
   });
+
+type RevealElement = (element: ComponentRef<typeof View>, onRevealed: () => void) => void;
+const RevealContext = createContext<RevealElement>((_element, onRevealed) => onRevealed());
+export const useRevealInScreen = () => useContext(RevealContext);
 
 export interface ScreenProps {
   header?: BrandHeaderProps | false;
@@ -34,39 +42,55 @@ export function Screen({ header = {}, children, footer, background, scroll = tru
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const entering = reduceMotion ? undefined : SCREEN_ENTER;
+  const scrollRef = useRef<KeyboardAwareScrollViewRef>(null);
+  const contentRef = useRef<ComponentRef<typeof View>>(null);
+  const reveal = useCallback<RevealElement>((element, onRevealed) => {
+    if (!contentRef.current || !scrollRef.current) return onRevealed();
+    element.measureLayout(
+      contentRef.current,
+      (_x, y) => {
+        scrollRef.current?.scrollTo({ y: Math.max(0, y), animated: false });
+        requestAnimationFrame(onRevealed);
+      },
+      onRevealed,
+    );
+  }, []);
 
   const body = (
-    <Animated.View entering={entering} style={[styles.content, contentStyle]}>
+    <Animated.View ref={contentRef} collapsable={false} entering={entering} style={[styles.content, contentStyle]}>
       {children}
     </Animated.View>
   );
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      {background}
-      {header !== false && <BrandHeader {...header} />}
-      {/* Keeps the sticky CTA above the keyboard on both platforms (Android edge-to-edge included). */}
-      <KeyboardAvoidingView style={styles.flex} behavior="padding">
-        {scroll ? (
-          <KeyboardAwareScrollView
-            bottomOffset={space[6]}
-            style={styles.flex}
-            contentContainerStyle={[styles.scroll, !footer && { paddingBottom: insets.bottom + space[8] }]}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {body}
-          </KeyboardAwareScrollView>
-        ) : (
-          <View style={styles.flex}>{body}</View>
-        )}
-        {footer ? (
-          <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
-            <View style={styles.footerInner}>{footer}</View>
-          </View>
-        ) : null}
-      </KeyboardAvoidingView>
-    </View>
+    <RevealContext.Provider value={reveal}>
+      <View style={[styles.root, { paddingTop: insets.top }]}>
+        {background}
+        {header !== false && <BrandHeader {...header} />}
+        {/* Keeps the sticky CTA above the keyboard on both platforms (Android edge-to-edge included). */}
+        <KeyboardAvoidingView style={styles.flex} behavior="padding">
+          {scroll ? (
+            <KeyboardAwareScrollView
+              ref={scrollRef}
+              bottomOffset={space[6]}
+              style={styles.flex}
+              contentContainerStyle={[styles.scroll, !footer && { paddingBottom: insets.bottom + space[8] }]}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {body}
+            </KeyboardAwareScrollView>
+          ) : (
+            <View style={styles.flex}>{body}</View>
+          )}
+          {footer ? (
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+              <View style={styles.footerInner}>{footer}</View>
+            </View>
+          ) : null}
+        </KeyboardAvoidingView>
+      </View>
+    </RevealContext.Provider>
   );
 }
 

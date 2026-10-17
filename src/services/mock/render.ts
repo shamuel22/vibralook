@@ -6,7 +6,7 @@
 import type { RenderJob, RenderStatus } from '@/domain/types';
 
 import { AbortError, type RenderService, type SelfieService } from '../types';
-import { consume, getMockSettings } from './settings';
+import { consume, consumeVariantFailure, getMockSettings } from './settings';
 
 function wait(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -31,9 +31,7 @@ export const mockRenderService: RenderService = {
     emit('processing');
     await wait(between(getMockSettings().renderLatency), signal);
 
-    const fail = kind === 'edit'
-      ? consume('failEditOnce', false)
-      : getMockSettings().failVariantOnce === recipe.variant && consume('failVariantOnce', null) !== null;
+    const fail = kind === 'edit' ? consume('failEditOnce', false) : consumeVariantFailure(recipe.variant);
 
     const job: RenderJob = fail
       ? { recipeId: recipe.id, status: 'error', error: { code: 'provider', retriable: true }, simulated: true }

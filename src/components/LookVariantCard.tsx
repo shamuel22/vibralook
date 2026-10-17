@@ -69,7 +69,10 @@ export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCo
       </PressableScale>
       <View style={[styles.row, stacked && styles.stackedRow]} pointerEvents="box-none">
         <View style={[styles.photoColumn, stacked && styles.stackedPhoto]} pointerEvents="box-none">
-          <View style={[styles.photo, ready && (stacked ? styles.photoSquare : styles.photoAspect)]} pointerEvents={failed ? 'box-none' : 'none'}>
+          <View
+            style={[styles.photo, ready && (stacked ? styles.photoSquare : styles.photoAspect)]}
+            pointerEvents={failed ? 'box-none' : 'none'}
+          >
             {ready && job.imageUri ? (
               <Image
                 source={job.imageUri}
@@ -114,7 +117,7 @@ export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCo
           </View>
           {ready && job.simulated && (
             <View pointerEvents="none" style={styles.seal}>
-              <SimulationSeal compact />
+              <SimulationSeal />
             </View>
           )}
         </View>
@@ -122,6 +125,7 @@ export function LookVariantCard({ recipe, job, selected, onSelect, onRetry, onCo
           <View
             pointerEvents="none"
             accessible={false}
+            accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
             style={styles.copy}
           >
@@ -207,7 +211,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   flatSwatch: { flex: 1 },
-  seal: { position: 'absolute', top: space[2], left: space[2] },
+  seal: { alignSelf: 'stretch' },
   retry: {
     minHeight: layout.minTouch,
     paddingHorizontal: space[2],

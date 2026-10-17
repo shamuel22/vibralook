@@ -16,7 +16,7 @@ export function SimulationSeal({ style, compact }: { style?: StyleProp<ViewStyle
     <View style={[styles.pill, style]} accessible accessibilityLabel={t('common.simulatedSeal')}>
       <FlaskConical color={colors.white} size={14} strokeWidth={2} />
       {!compact && (
-        <AppText variant="label" color={colors.white} numberOfLines={2} style={styles.text}>
+        <AppText variant="label" color={colors.white} style={styles.text}>
           {t('common.simulatedSeal')}
         </AppText>
       )}
@@ -35,5 +35,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[3],
     paddingVertical: space[1],
   },
-  text: { fontSize: 12, lineHeight: 16, flexShrink: 1 },
+  text: { flexShrink: 1 },
 });

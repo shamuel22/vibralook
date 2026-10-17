@@ -9,7 +9,12 @@ import { AppText } from './AppText';
 export function SelfieTip({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
     <View style={styles.tip}>
-      <View style={styles.icon} accessible={false} importantForAccessibility="no-hide-descendants">
+      <View
+        style={styles.icon}
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
         <Icon size={space[8]} color={colors.ink} strokeWidth={1.5} />
       </View>
       <AppText variant="labelStrong" align="center">

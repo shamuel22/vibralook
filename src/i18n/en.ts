@@ -107,6 +107,7 @@ const en: Dictionary = {
     review: {
       title: 'Happy with your selfie?',
       subtitle: 'We’ll use this photo to try on your looks.',
+      validated: 'Your photo is ready to use.',
       checking: 'Checking your photo…',
       checkFace: 'Full face',
       checkLight: 'Even light',
@@ -146,7 +147,11 @@ const en: Dictionary = {
     skip: 'Skip for now',
     continue: 'Continue',
     emptyDeclared: 'Pick at least one shade, or skip this step.',
-    selectedCount: '{count} selected',
+    noUsableItems:
+      'None of your selected products can be used with your preferences. Change shades or finishes, remove blocked products, or skip for now.',
+    retainedBlocked: 'Kept in your kit, but won’t be used. {reason}',
+    removeItem: 'Remove {shade}',
+    selectedCount: 'Selected to use: {count}',
   },
   finishes: {
     matte: 'Matte',
@@ -175,7 +180,7 @@ const en: Dictionary = {
     statusPending: 'Waiting',
     statusProcessing: 'Trying colors on your photo…',
     statusSuccess: 'Ready',
-    statusError: 'This look couldn’t be created. You can try it again; the others are still here.',
+    statusError: 'This look couldn’t be created. You can try it again.',
     translateError: 'We couldn’t read your vibe. Your text and kit are still here.',
     seeLooks: 'See my looks',
     cancelSession: 'Cancel',
@@ -216,7 +221,7 @@ const en: Dictionary = {
     intensityLevel: 'Intensity {level} of 5',
     zoneOff: 'This area isn’t part of the look.',
     zoneOffKit: 'There’s no {product} in your kit, so this look doesn’t use it.',
-    blocked: 'This change doesn’t respect “{constraint}”.',
+    blocked: 'This change conflicts with your “{constraint}” preference.',
     blockedSuggestion: 'How about {suggestion}?',
     applySuggestion: 'Use the alternative',
     seeChange: 'See the change',
@@ -247,6 +252,9 @@ const en: Dictionary = {
     save: 'Save look',
     saving: 'Saving…',
     saved: 'Saved to your photos',
+    cardLoading: 'Preparing your card image…',
+    cardImageError: 'The card photo couldn’t load. Reload it to save or share.',
+    reloadCard: 'Reload card',
     saveError: 'We couldn’t save the card. Try again.',
     share: 'Share',
     newVibe: 'Create another vibe',
@@ -259,7 +267,16 @@ const en: Dictionary = {
     },
   },
   dev: {
+    failVariants: 'Fail the next render of each selected look (select all three to test all failing together).',
     testImage: 'test image',
+  },
+  mockNoZones: {
+    tagline: 'Time to review your kit.',
+    explanation:
+      'No color was applied for “{vibe}”: your kit and preferences leave no areas available. Adjust your kit, or go back and skip it to explore a suggested palette.',
+    prep: 'Leave your face as it is; this recipe applies no makeup.',
+    review: 'Check which products in your kit work with your preferences.',
+    finish: 'Go back to adjust or skip your kit before creating new looks.',
   },
   errors: {
     generic: 'Something went wrong. You can try again.',

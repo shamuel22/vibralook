@@ -9,7 +9,7 @@ import { Redirect, router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { Bookmark, Share2 } from 'lucide-react-native';
 import { useRef, useState, type ComponentRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import {
@@ -36,11 +36,18 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function ResultScreen() {
   const t = useT();
+  const { fontScale } = useWindowDimensions();
   const { state, actions } = useSession();
   const { finalRecipe, sourceImage } = state;
   const card = useRef<ComponentRef<typeof View>>(null);
   const [save, setSave] = useState<SaveState>('idle');
   const [sharing, setSharing] = useState(false);
+  const [cardAttempt, setCardAttempt] = useState(0);
+  const [cardState, setCardState] = useState<{ key: string; image: 'loading' | 'ready' | 'error'; layout: boolean }>({
+    key: '',
+    image: 'loading',
+    layout: false,
+  });
 
   if (!sourceImage) return <Redirect href="/selfie" />;
   const image = imageFor(state, finalRecipe);
@@ -49,9 +56,23 @@ export default function ResultScreen() {
   const simulated = isSimulated(state, finalRecipe);
   const name = t(`variants.${finalRecipe.variant}`);
 
-  const capture = () => captureRef(card, { format: 'png', quality: 1, result: 'tmpfile' });
+  // Key the native capture source as well as its readiness: stale callbacks can never
+  // enable capture of a new recipe, image, language, or Dynamic Type layout.
+  const cardKey = JSON.stringify([finalRecipe, image, name, t('result.howTo'), fontScale, cardAttempt]);
+  const cardReady = cardState.key === cardKey && cardState.image === 'ready' && cardState.layout;
+  const cardFailed = cardState.key === cardKey && cardState.image === 'error';
+  const updateCard = (patch: Partial<Omit<typeof cardState, 'key'>>) =>
+    setCardState((previous) => ({
+      ...(previous.key === cardKey ? previous : { key: cardKey, image: 'loading' as const, layout: false }),
+      ...patch,
+    }));
+  const capture = () => {
+    if (!cardReady || !card.current) throw new Error('card-not-ready');
+    return captureRef(card, { format: 'png', quality: 1, result: 'tmpfile' });
+  };
 
   const saveCard = async () => {
+    if (!cardReady || sharing || save === 'saving') return;
     setSave('saving');
     try {
       const uri = await capture();
@@ -67,6 +88,7 @@ export default function ResultScreen() {
   };
 
   const shareCard = async () => {
+    if (!cardReady || sharing || save === 'saving') return;
     setSharing(true);
     try {
       const uri = await capture();
@@ -88,6 +110,7 @@ export default function ResultScreen() {
               label={t('result.share')}
               icon={Share2}
               arrow={false}
+              disabled={!cardReady || save === 'saving'}
               loading={sharing}
               onPress={shareCard}
             />
@@ -97,6 +120,7 @@ export default function ResultScreen() {
               label={t('result.save')}
               icon={Bookmark}
               arrow={false}
+              disabled={!cardReady || sharing}
               loading={save === 'saving'}
               loadingLabel={t('result.saving')}
               onPress={saveCard}
@@ -115,6 +139,15 @@ export default function ResultScreen() {
         beforeAlt={t('selfie.review.photoAlt')}
         afterAlt={t('looks.lookAlt', { variant: name })}
       />
+
+      {!cardReady && !cardFailed ? <InlineNotice message={t('result.cardLoading')} /> : null}
+      {cardFailed ? (
+        <InlineNotice
+          tone="error"
+          message={t('result.cardImageError')}
+          action={{ label: t('result.reloadCard'), onPress: () => setCardAttempt((attempt) => attempt + 1) }}
+        />
+      ) : null}
 
       {save === 'saved' ? <InlineNotice tone="success" message={t('result.saved')} /> : null}
       {save === 'error' ? <InlineNotice tone="error" focusOnMount message={t('result.saveError')} /> : null}
@@ -160,9 +193,21 @@ export default function ResultScreen() {
         style={styles.offscreen}
         pointerEvents="none"
         accessible={false}
+        accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
       >
-        <LookCard ref={card} recipe={finalRecipe} imageUri={image} simulated={simulated} />
+        <LookCard
+          key={cardKey}
+          ref={card}
+          recipe={finalRecipe}
+          imageUri={image}
+          simulated={simulated}
+          onImageLoad={() => updateCard({ image: 'ready' })}
+          onImageError={() => updateCard({ image: 'error' })}
+          onLayout={({ nativeEvent }) =>
+            updateCard({ layout: nativeEvent.layout.width > 0 && nativeEvent.layout.height > 0 })
+          }
+        />
       </View>
     </Screen>
   );

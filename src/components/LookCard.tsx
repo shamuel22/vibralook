@@ -5,7 +5,7 @@
  */
 import { Image } from 'expo-image';
 import { forwardRef, type ComponentRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View, type ViewProps } from 'react-native';
 
 import { recipePalette } from '@/domain/recipe';
 import { getShade } from '@/domain/shades';
@@ -23,19 +23,28 @@ export interface LookCardProps {
   imageUri: string;
   simulated: boolean;
   onImageLoad?: () => void;
+  onImageError?: () => void;
+  onLayout?: ViewProps['onLayout'];
 }
 
 export const LookCard = forwardRef<ComponentRef<typeof View>, LookCardProps>(function LookCard(
-  { recipe, imageUri, simulated, onImageLoad },
+  { recipe, imageUri, simulated, onImageLoad, onImageError, onLayout },
   ref,
 ) {
   const t = useT();
+  const stacked = useWindowDimensions().fontScale > 1.15;
   const total = recipe.steps.reduce((n, s) => n + s.minutes, 0);
   return (
-    <View ref={ref} collapsable={false} style={styles.card}>
+    <View ref={ref} collapsable={false} style={styles.card} onLayout={onLayout}>
       <Image source={LOGO} style={styles.logo} contentFit="contain" />
       <View style={styles.photo}>
-        <Image source={imageUri} style={StyleSheet.absoluteFill} contentFit="cover" onLoad={onImageLoad} />
+        <Image
+          source={imageUri}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          onDisplay={onImageLoad}
+          onError={onImageError}
+        />
       </View>
       {simulated ? (
         <AppText variant="label" color={colors.error} align="center">
@@ -46,18 +55,23 @@ export const LookCard = forwardRef<ComponentRef<typeof View>, LookCardProps>(fun
         <AppText variant="h2">{t(`variants.${recipe.variant}`)}</AppText>
         <AppText variant="label">{recipe.tagline}</AppText>
       </View>
-      <View style={styles.palette}>
+      <View style={[styles.palette, stacked && styles.paletteStacked]}>
         {recipePalette(recipe).map(({ zone, shadeId }) => (
-          <View key={zone} style={styles.swatchItem}>
+          <View key={zone} style={[styles.swatchItem, stacked && styles.swatchRow]}>
             <View style={[styles.swatch, { backgroundColor: getShade(shadeId).hex }]} />
-            <AppText variant="label" color={colors.ink} align="center" numberOfLines={2}>
+            <AppText
+              variant="label"
+              color={colors.ink}
+              align={stacked ? 'left' : 'center'}
+              style={stacked && styles.flex}
+            >
               {t(getShade(shadeId).nameKey as TKey)}
             </AppText>
           </View>
         ))}
       </View>
       <View style={styles.steps}>
-        <AppText variant="eyebrow">
+        <AppText variant="labelStrong">
           {t('result.howTo')} · {t('result.totalTime', { minutes: total })}
         </AppText>
         {recipe.steps.map((s, i) => (
@@ -69,7 +83,7 @@ export const LookCard = forwardRef<ComponentRef<typeof View>, LookCardProps>(fun
           </View>
         ))}
       </View>
-      <AppText variant="label" align="center" style={styles.foot}>
+      <AppText variant="label" align="center">
         {recipe.paletteSource === 'kit' ? t('result.kitLabel') : t('result.guideLabel')}
       </AppText>
     </View>
@@ -84,13 +98,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cream,
   },
   logo: { height: 22, width: 126, alignSelf: 'center' },
-  photo: { width: '100%', aspectRatio: 4 / 5, borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.creamDeep },
+  photo: {
+    width: '100%',
+    aspectRatio: 4 / 5,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    backgroundColor: colors.creamDeep,
+  },
   titleRow: { gap: space[1], alignItems: 'center' },
   palette: { flexDirection: 'row', justifyContent: 'center', gap: space[4] },
+  paletteStacked: { flexDirection: 'column' },
+  swatchRow: { width: '100%', flexDirection: 'row', gap: space[3] },
   swatchItem: { width: 80, alignItems: 'center', gap: space[1] },
   swatch: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: colors.line },
   steps: { gap: space[2] },
   step: { flexDirection: 'row', gap: space[2] },
   flex: { flex: 1 },
-  foot: { fontSize: 12, lineHeight: 16 },
 });

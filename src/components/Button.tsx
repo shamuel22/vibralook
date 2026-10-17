@@ -73,7 +73,7 @@ export function Button({
         ) : Icon ? (
           <Icon color={fg} size={iconSize} strokeWidth={1.75} />
         ) : null}
-        <AppText variant="button" color={fg} numberOfLines={2} align="center" style={styles.label}>
+        <AppText variant="button" color={fg} align="center" style={styles.label}>
           {loading && loadingLabel ? loadingLabel : label}
         </AppText>
         {arrow && !loading ? <ArrowRight color={fg} size={iconSize} strokeWidth={1.75} /> : null}

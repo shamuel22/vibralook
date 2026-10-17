@@ -18,6 +18,7 @@ import {
   ButtonRow,
 } from '@/components';
 import { useMotionAllowed } from '@/hooks/useMotionAllowed';
+import { useAccessibilityAnnouncement } from '@/hooks/useAccessibilityAnnouncement';
 import { useT } from '@/i18n';
 import { useSession } from '@/state/session';
 import { colors, layout, radius, space } from '@/theme';
@@ -25,7 +26,7 @@ import { colors, layout, radius, space } from '@/theme';
 function CheckItem({ label }: { label: string }) {
   return (
     <View style={styles.checkItem}>
-      <View accessible={false} importantForAccessibility="no-hide-descendants">
+      <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <CheckCircle2 size={space[6]} color={colors.ink} strokeWidth={1.5} />
       </View>
       <AppText variant="label" style={styles.checkLabel}>
@@ -41,6 +42,10 @@ export default function ReviewSelfieScreen() {
   const { state } = useSession();
   const { width, height } = useWindowDimensions();
   const image = state.sourceImage;
+  const screenActive = useAccessibilityAnnouncement(
+    image?.check.status === 'valid' ? t('selfie.review.validated') : null,
+    true,
+  );
   if (!image) return <Redirect href="/selfie" />;
   const aspect = image.width / image.height;
   const photoWidth = Math.min(width - layout.gutter * 2, layout.maxWidth - layout.gutter * 2, height * 0.42 * aspect);
@@ -84,7 +89,7 @@ export default function ReviewSelfieScreen() {
             style={styles.checking}
             accessible
             accessibilityRole="text"
-            accessibilityLiveRegion="polite"
+            accessibilityLiveRegion={screenActive ? 'polite' : 'none'}
             accessibilityLabel={t('selfie.review.checking')}
           >
             <ActivityIndicator color={colors.white} size="small" animating={motionAllowed} />
@@ -95,7 +100,11 @@ export default function ReviewSelfieScreen() {
         )}
       </View>
       {valid && (
-        <View style={styles.checks}>
+        <View
+          style={styles.checks}
+          accessibilityLiveRegion={screenActive ? 'polite' : 'none'}
+          accessibilityLabel={t('selfie.review.validated')}
+        >
           <CheckItem label={t('selfie.review.checkFace')} />
           <CheckItem label={t('selfie.review.checkLight')} />
         </View>

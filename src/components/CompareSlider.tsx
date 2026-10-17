@@ -111,78 +111,82 @@ export function CompareSlider({
   }));
 
   return (
-    <GestureDetector gesture={gesture}>
-      <View
-        accessible
-        accessibilityRole="adjustable"
-        accessibilityLabel={t('compare.label')}
-        accessibilityHint={`${t('compare.hint')}. ${beforeAlt}. ${afterAlt}${afterSimulated ? `. ${t('common.simulatedSeal')}` : ''}`}
-        accessibilityValue={{
-          min: 0,
-          max: 100,
-          now: percent,
-          text: t('compare.position', { after: percent, before: 100 - percent }),
-        }}
-        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-        onAccessibilityAction={({ nativeEvent }) => {
-          if (nativeEvent.actionName !== 'increment' && nativeEvent.actionName !== 'decrement') return;
-          cancelAnimation(position);
-          const next = clamp(position.get() + (nativeEvent.actionName === 'increment' ? 0.1 : -0.1));
-          position.set(next);
-          committed.set(Math.round(next * 100));
-        }}
-        onLayout={({ nativeEvent }) => {
-          setWidth(nativeEvent.layout.width);
-          frameWidth.set(nativeEvent.layout.width);
-        }}
-        style={[styles.frame, { aspectRatio }, style]}
-      >
+    <View style={styles.comparison}>
+      <GestureDetector gesture={gesture}>
         <View
-          pointerEvents="none"
-          accessible={false}
-          importantForAccessibility="no-hide-descendants"
-          style={StyleSheet.absoluteFill}
+          accessible
+          accessibilityRole="adjustable"
+          accessibilityLabel={t('compare.label')}
+          accessibilityHint={`${t('compare.hint')}. ${beforeAlt}. ${afterAlt}${afterSimulated ? `. ${t('common.simulatedSeal')}` : ''}`}
+          accessibilityValue={{
+            min: 0,
+            max: 100,
+            now: percent,
+            text: t('compare.position', { after: percent, before: 100 - percent }),
+          }}
+          accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+          onAccessibilityAction={({ nativeEvent }) => {
+            if (nativeEvent.actionName !== 'increment' && nativeEvent.actionName !== 'decrement') return;
+            cancelAnimation(position);
+            const next = clamp(position.get() + (nativeEvent.actionName === 'increment' ? 0.1 : -0.1));
+            position.set(next);
+            committed.set(Math.round(next * 100));
+          }}
+          onLayout={({ nativeEvent }) => {
+            setWidth(nativeEvent.layout.width);
+            frameWidth.set(nativeEvent.layout.width);
+          }}
+          style={[styles.frame, { aspectRatio }, style]}
         >
-          <Image
-            source={beforeUri}
-            contentFit="cover"
-            contentPosition="center"
-            accessibilityLabel={beforeAlt}
+          <View
+            pointerEvents="none"
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
             style={StyleSheet.absoluteFill}
-          />
-          <View style={[styles.pill, styles.before]}>
-            <AppText variant="labelStrong" color={colors.white}>
-              {t('compare.before')}
-            </AppText>
-          </View>
-          <Animated.View style={[StyleSheet.absoluteFill, styles.clip, clip]}>
-            <Animated.View style={[styles.afterFrame, { width }, counter]}>
-              <Image
-                source={afterUri}
-                contentFit="cover"
-                contentPosition="center"
-                accessibilityLabel={afterAlt}
-                style={StyleSheet.absoluteFill}
-              />
-              <View style={[styles.pill, styles.after]}>
-                <AppText variant="labelStrong" color={colors.white}>
-                  {t('compare.after')}
-                </AppText>
-              </View>
-              {afterSimulated && <SimulationSeal compact style={styles.seal} />}
+          >
+            <Image
+              source={beforeUri}
+              contentFit="cover"
+              contentPosition="center"
+              accessibilityLabel={beforeAlt}
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={[styles.pill, styles.before]}>
+              <AppText variant="labelStrong" color={colors.white}>
+                {t('compare.before')}
+              </AppText>
+            </View>
+            <Animated.View style={[StyleSheet.absoluteFill, styles.clip, clip]}>
+              <Animated.View style={[styles.afterFrame, { width }, counter]}>
+                <Image
+                  source={afterUri}
+                  contentFit="cover"
+                  contentPosition="center"
+                  accessibilityLabel={afterAlt}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={[styles.pill, styles.after]}>
+                  <AppText variant="labelStrong" color={colors.white}>
+                    {t('compare.after')}
+                  </AppText>
+                </View>
+              </Animated.View>
             </Animated.View>
-          </Animated.View>
-          <Animated.View style={[styles.divider, divider]} />
-          <Animated.View style={[styles.handle, handle]}>
-            <GripVertical size={space[6]} color={colors.ink} strokeWidth={1.75} />
-          </Animated.View>
+            <Animated.View style={[styles.divider, divider]} />
+            <Animated.View style={[styles.handle, handle]}>
+              <GripVertical size={space[6]} color={colors.ink} strokeWidth={1.75} />
+            </Animated.View>
+          </View>
         </View>
-      </View>
-    </GestureDetector>
+      </GestureDetector>
+      {afterSimulated && <SimulationSeal style={styles.seal} />}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  comparison: { gap: space[2] },
   frame: { width: '100%', overflow: 'hidden', borderRadius: radius.md, backgroundColor: colors.creamDeep },
   clip: { overflow: 'hidden' },
   afterFrame: { position: 'absolute', top: 0, bottom: 0, left: 0 },
@@ -197,7 +201,7 @@ const styles = StyleSheet.create({
   },
   before: { right: space[3] },
   after: { left: space[3] },
-  seal: { position: 'absolute', left: space[3], bottom: space[3] },
+  seal: { alignSelf: 'stretch' },
   divider: { position: 'absolute', top: 0, bottom: 0, left: 0, width: 2, backgroundColor: colors.white },
   handle: {
     position: 'absolute',

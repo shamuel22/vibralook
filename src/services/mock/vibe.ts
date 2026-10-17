@@ -24,7 +24,8 @@ import { consume, getMockSettings } from './settings';
 
 type Mood = 'cool' | 'warm';
 
-const WARM_WORDS = /jazz|rooftop|azotea|atardecer|sunset|verano|summer|cálid|warm|fuego|dorad|golden|otoño|autumn|fall/i;
+const WARM_WORDS =
+  /jazz|rooftop|azotea|atardecer|sunset|verano|summer|cálid|warm|fuego|dorad|golden|otoño|autumn|fall/i;
 
 /** Preferred shade per mood × variant × zone. */
 const PALETTES: Record<Mood, Record<VariantKey, Record<Zone, string>>> = {
@@ -73,7 +74,14 @@ function buildZone(zone: Zone, variant: VariantKey, mood: Mood, input: Translate
   const intensity = clampIntensity(BASE_INTENSITY[variant] + PREF_SHIFT[intent.intensity], max);
 
   if (!isZoneAllowed(zone, constraints)) {
-    return { enabled: false, disabledReason: 'constraint', shadeId: preferredShade, finish, intensity, source: 'guide' };
+    return {
+      enabled: false,
+      disabledReason: 'constraint',
+      shadeId: preferredShade,
+      finish,
+      intensity,
+      source: 'guide',
+    };
   }
 
   if (kit.status !== 'declared') {
@@ -85,8 +93,11 @@ function buildZone(zone: Zone, variant: VariantKey, mood: Mood, input: Translate
     return { enabled: false, disabledReason: 'notInKit', shadeId: preferredShade, finish, intensity, source: 'kit' };
   }
   // Whisper takes the lightest kit shade, statement the deepest, balance the first declared.
-  const byLightness = [...usable].sort((a, b) => lightness(getShade(b.shadeId).hex) - lightness(getShade(a.shadeId).hex));
-  const pick = variant === 'whisper' ? byLightness[0] : variant === 'statement' ? byLightness[byLightness.length - 1] : usable[0];
+  const byLightness = [...usable].sort(
+    (a, b) => lightness(getShade(b.shadeId).hex) - lightness(getShade(a.shadeId).hex),
+  );
+  const pick =
+    variant === 'whisper' ? byLightness[0] : variant === 'statement' ? byLightness[byLightness.length - 1] : usable[0];
   return { enabled: true, shadeId: pick.shadeId, finish: pick.finish, intensity, source: 'kit' };
 }
 
@@ -118,6 +129,13 @@ function describeRecipe(r: Omit<LookRecipe, 'tagline' | 'explanation' | 'steps'>
   const { locale, intent } = input;
   const vibe = intent.text.trim();
   const zones = (['eyes', 'lips', 'cheeks'] as const).filter((z) => r[z].enabled);
+  if (zones.length === 0) {
+    return {
+      tagline: translate(locale, 'mockNoZones.tagline'),
+      explanation: translate(locale, 'mockNoZones.explanation', { vibe }),
+      steps: buildSteps(r, input),
+    };
+  }
   const parts = zones.map((z) => {
     const name = shadeName(locale, r[z].shadeId);
     if (locale === 'es') {
@@ -125,7 +143,10 @@ function describeRecipe(r: Omit<LookRecipe, 'tagline' | 'explanation' | 'steps'>
     }
     return { eyes: `${name} eyes`, lips: `a ${name} lip`, cheeks: `${name} cheeks` }[z];
   });
-  const joined = parts.length > 1 ? `${parts.slice(0, -1).join(', ')}${locale === 'es' ? ' y ' : ' and '}${parts.at(-1)}` : (parts[0] ?? '');
+  const joined =
+    parts.length > 1
+      ? `${parts.slice(0, -1).join(', ')}${locale === 'es' ? ' y ' : ' and '}${parts.at(-1)}`
+      : (parts[0] ?? '');
   const pref = translate(locale, `intent.intensity.${intent.intensity}` as TKey).toLowerCase();
   const explanation =
     locale === 'es'
@@ -140,12 +161,21 @@ function buildSteps(r: Omit<LookRecipe, 'tagline' | 'explanation' | 'steps'>, in
   const finishName = (f: Finish) => translate(locale, `finishes.${f}` as TKey).toLowerCase();
   const steps: RecipeStep[] = [];
   const zonesOn = (['eyes', 'cheeks', 'lips'] as const).filter((z) => r[z].enabled);
+  if (zonesOn.length === 0) {
+    return [
+      { zone: 'prep', minutes: 1, text: translate(locale, 'mockNoZones.prep') },
+      { zone: 'prep', minutes: 1, text: translate(locale, 'mockNoZones.review') },
+      { zone: 'finish', minutes: 1, text: translate(locale, 'mockNoZones.finish') },
+    ];
+  }
 
   if (intent.time >= 10 || zonesOn.length < 2) {
     steps.push({
       zone: 'prep',
       minutes: 1,
-      text: es ? 'Hidrata y deja la piel tal como es; no hace falta base.' : 'Moisturize and leave your skin as it is; no foundation needed.',
+      text: es
+        ? 'Hidrata y deja la piel tal como es; no hace falta base.'
+        : 'Moisturize and leave your skin as it is; no foundation needed.',
     });
   }
   for (const z of zonesOn) {
@@ -169,7 +199,9 @@ function buildSteps(r: Omit<LookRecipe, 'tagline' | 'explanation' | 'steps'>, in
     steps.push({
       zone: 'finish',
       minutes: 1,
-      text: es ? 'Mírate con luz natural y suaviza cualquier borde.' : 'Check yourself in natural light and soften any edges.',
+      text: es
+        ? 'Mírate con luz natural y suaviza cualquier borde.'
+        : 'Check yourself in natural light and soften any edges.',
     });
   }
   // Fit the time budget.

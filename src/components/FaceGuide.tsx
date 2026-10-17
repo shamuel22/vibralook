@@ -6,7 +6,13 @@ import { colors } from '@/theme';
 
 export function FaceGuide() {
   return (
-    <View pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants" style={styles.guide}>
+    <View
+      pointerEvents="none"
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={styles.guide}
+    >
       {/* Fixed 100:130 frame so the oval never stretches with the preview's aspect ratio. */}
       <View style={styles.frame}>
         <Svg width="100%" height="100%" viewBox="0 0 100 130">

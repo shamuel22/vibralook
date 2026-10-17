@@ -8,6 +8,7 @@ import { useEffect, useRef, type ComponentRef } from 'react';
 import { AccessibilityInfo, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 
+import { useAccessibilityAnnouncement } from '@/hooks/useAccessibilityAnnouncement';
 import { colors, easing, motion, radius, space } from '@/theme';
 
 import { AppText } from './AppText';
@@ -33,19 +34,31 @@ export interface InlineNoticeProps {
   message: string;
   action?: { label: string; onPress: () => void };
   focusOnMount?: boolean;
+  /** Action-driven confirmation; success notices announce by default. */
+  announce?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-export function InlineNotice({ tone = 'info', message, action, focusOnMount, style }: InlineNoticeProps) {
+export function InlineNotice({
+  tone = 'info',
+  message,
+  action,
+  focusOnMount,
+  announce = tone === 'success',
+  style,
+}: InlineNoticeProps) {
   const ref = useRef<ComponentRef<typeof View>>(null);
   const reduceMotion = useReducedMotion();
   const cfg = TONES[tone];
   const Icon = cfg.icon;
+  const active = useAccessibilityAnnouncement(announce ? message : null, true);
+  const focusedMessage = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!focusOnMount) return;
-    if (ref.current) AccessibilityInfo.sendAccessibilityEvent(ref.current, 'focus');
-  }, [focusOnMount]);
+    if (!focusOnMount || focusedMessage.current === message) return;
+    focusedMessage.current = message;
+    if (active && ref.current) AccessibilityInfo.sendAccessibilityEvent(ref.current, 'focus');
+  }, [active, focusOnMount, message]);
 
   return (
     <Animated.View
@@ -55,17 +68,28 @@ export function InlineNotice({ tone = 'info', message, action, focusOnMount, sty
       <View
         ref={ref}
         accessible
-        accessibilityRole={tone === 'error' ? 'alert' : 'text'}
-        accessibilityLiveRegion={tone === 'error' ? 'assertive' : 'polite'}
+        accessibilityRole={active && tone === 'error' ? 'alert' : 'text'}
+        accessibilityLiveRegion={!active ? 'none' : tone === 'error' ? 'assertive' : 'polite'}
         style={styles.row}
       >
         <Icon color={cfg.fg} size={20} strokeWidth={1.75} />
-        <AppText variant="label" color={tone === 'error' || tone === 'success' ? cfg.fg : colors.ink} style={styles.text}>
+        <AppText
+          variant="label"
+          color={tone === 'error' || tone === 'success' ? cfg.fg : colors.ink}
+          style={styles.text}
+        >
           {message}
         </AppText>
       </View>
       {action ? (
-        <Button variant="secondary" compact arrow={false} label={action.label} onPress={action.onPress} style={styles.action} />
+        <Button
+          variant="secondary"
+          compact
+          arrow={false}
+          label={action.label}
+          onPress={action.onPress}
+          style={styles.action}
+        />
       ) : null}
     </Animated.View>
   );

@@ -14,6 +14,7 @@ export function ZoneIcon({ zone, size = space[6], color = colors.ink }: { zone: 
       color={color}
       strokeWidth={1.75}
       accessible={false}
+      accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     />
   );

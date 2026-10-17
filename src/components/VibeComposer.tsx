@@ -5,15 +5,17 @@
  */
 import { PencilLine } from 'lucide-react-native';
 import { useEffect, useRef, type ComponentRef } from 'react';
-import { Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
+import { AccessibilityInfo, Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { VIBE_MAX_LENGTH } from '@/domain/types';
 import { useT } from '@/i18n';
+import { useScreenActive } from '@/hooks/useAccessibilityAnnouncement';
 import { colors, fonts, layout, radius, shadow, space } from '@/theme';
 
 import { AppText } from './AppText';
 import { ArtPlaceholder, type ArtId } from './ArtPlaceholder';
 import { PressableScale } from './PressableScale';
+import { useRevealInScreen } from './Screen';
 
 export type VibeExample = 'jazz' | 'sakura' | 'meeting';
 export const VIBE_EXAMPLES: VibeExample[] = ['jazz', 'sakura', 'meeting'];
@@ -28,19 +30,35 @@ export interface VibeComposerProps {
   value: string;
   onChange: (text: string) => void;
   error?: string;
+  errorAttempt?: number;
 }
 
-export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
+export function VibeComposer({ value, onChange, error, errorAttempt }: VibeComposerProps) {
   const t = useT();
   const input = useRef<ComponentRef<typeof TextInput>>(null);
+  const errorRef = useRef<ComponentRef<typeof View>>(null);
+  const reveal = useRevealInScreen();
+  const active = useScreenActive();
   // Multiline inputs don't grow for the placeholder; reserve ~3 lines at the current font scale.
   const { fontScale } = useWindowDimensions();
   const minInputHeight = Math.round(INPUT_LINE * 3 * Math.min(fontScale, 2));
 
-  // A blocking error takes focus to the field: the keyboard opens and the field scrolls into view.
+  // Reveal the blocking message before moving VoiceOver/TalkBack focus to it.
   useEffect(() => {
-    if (error) input.current?.focus();
-  }, [error]);
+    if (!error || !active) return;
+    let cancelled = false;
+    const frame = requestAnimationFrame(() => {
+      const element = errorRef.current;
+      if (element)
+        reveal(element, () => {
+          if (!cancelled) AccessibilityInfo.sendAccessibilityEvent(element, 'focus');
+        });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
+  }, [active, error, errorAttempt, reveal]);
   const activeExample = VIBE_EXAMPLES.find((e) => t(`intent.examples.${e}`) === value.trim());
 
   return (
@@ -51,11 +69,7 @@ export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
             <ArtPlaceholder id={EXAMPLE_ART[activeExample]} aspectRatio={16 / 9} decorative style={styles.art} />
           </View>
         ) : null}
-        <Pressable
-          accessible={false}
-          onPress={() => input.current?.focus()}
-          style={styles.inputArea}
-        >
+        <Pressable accessible={false} onPress={() => input.current?.focus()} style={styles.inputArea}>
           <View style={styles.labelRow}>
             <AppText variant="labelStrong" nativeID="vibe-label">
               {t('intent.fieldLabel')}
@@ -79,9 +93,7 @@ export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
             style={[styles.input, { minHeight: minInputHeight }]}
             selectionColor={colors.coral}
           />
-          {activeExample ? (
-            <AppText variant="label">{t(`intent.exampleCardBody.${activeExample}`)}</AppText>
-          ) : null}
+          {activeExample ? <AppText variant="label">{t(`intent.exampleCardBody.${activeExample}`)}</AppText> : null}
           <AppText variant="label" align="right" accessibilityElementsHidden importantForAccessibility="no">
             {t('intent.counter', { count: value.length, max: VIBE_MAX_LENGTH })}
           </AppText>
@@ -89,13 +101,15 @@ export function VibeComposer({ value, onChange, error }: VibeComposerProps) {
       </View>
 
       {error ? (
-        <AppText variant="labelStrong" color={colors.error} accessibilityRole="alert" accessibilityLiveRegion="assertive">
-          {error}
-        </AppText>
+        <View ref={errorRef} collapsable={false} accessible accessibilityRole="alert" accessibilityLabel={error}>
+          <AppText variant="labelStrong" color={colors.error}>
+            {error}
+          </AppText>
+        </View>
       ) : null}
 
       <View style={styles.examples}>
-        <AppText variant="eyebrow">{t('intent.examplesLabel')}</AppText>
+        <AppText variant="labelStrong">{t('intent.examplesLabel')}</AppText>
         <View style={styles.exampleRow}>
           {VIBE_EXAMPLES.map((e) => {
             const label = t(`intent.examples.${e}`);

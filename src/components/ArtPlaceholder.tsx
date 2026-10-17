@@ -59,6 +59,7 @@ export function ArtPlaceholder({
         contentFit={contentFit}
         style={[{ aspectRatio }, style as object]}
         accessible={!decorative}
+        accessibilityElementsHidden={decorative}
         accessibilityLabel={decorative ? undefined : alt}
       />
     );
@@ -68,6 +69,7 @@ export function ArtPlaceholder({
     <View
       style={[styles.box, { aspectRatio }, style]}
       accessible={!decorative}
+      accessibilityElementsHidden={decorative}
       accessibilityLabel={decorative ? undefined : `${t('common.artPending')}: ${id}`}
       importantForAccessibility={decorative ? 'no-hide-descendants' : 'yes'}
     >

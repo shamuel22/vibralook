@@ -106,6 +106,7 @@ const es = {
     review: {
       title: '¿Se ve bien tu selfie?',
       subtitle: 'Usaremos esta foto para probar tus looks.',
+      validated: 'Tu foto está lista para continuar.',
       checking: 'Revisando tu foto…',
       checkFace: 'Rostro completo',
       checkLight: 'Luz uniforme',
@@ -145,7 +146,11 @@ const es = {
     skip: 'Omitir por ahora',
     continue: 'Continuar',
     emptyDeclared: 'Elige al menos un tono, u omite este paso.',
-    selectedCount: '{count} elegidos',
+    noUsableItems:
+      'Ningún producto seleccionado se puede usar con tus preferencias. Cambia los tonos o acabados, retira los productos bloqueados u omite por ahora.',
+    retainedBlocked: 'Guardado, pero no se usará. {reason}',
+    removeItem: 'Quitar {shade}',
+    selectedCount: 'Seleccionados para usar: {count}',
   },
   finishes: {
     matte: 'Mate',
@@ -174,7 +179,7 @@ const es = {
     statusPending: 'En espera',
     statusProcessing: 'Probando colores en tu foto…',
     statusSuccess: 'Listo',
-    statusError: 'Este look no se pudo generar. Puedes reintentarlo; los otros siguen disponibles.',
+    statusError: 'Este look no se pudo generar. Puedes reintentarlo.',
     translateError: 'No pudimos interpretar tu vibra. Tu texto y tu kit siguen aquí.',
     seeLooks: 'Ver mis looks',
     cancelSession: 'Cancelar',
@@ -246,6 +251,9 @@ const es = {
     save: 'Guardar look',
     saving: 'Guardando…',
     saved: 'Guardado en tus fotos',
+    cardLoading: 'Preparando la imagen de tu tarjeta…',
+    cardImageError: 'No pudimos cargar la foto de la tarjeta. Vuelve a cargarla para guardar o compartir.',
+    reloadCard: 'Volver a cargar la tarjeta',
     saveError: 'No pudimos guardar la tarjeta. Inténtalo de nuevo.',
     share: 'Compartir',
     newVibe: 'Crear otra vibra',
@@ -258,7 +266,16 @@ const es = {
     },
   },
   dev: {
+    failVariants: 'Fallar el próximo render de cada variante marcada (marca las tres para que fallen juntas).',
     testImage: 'imagen de prueba',
+  },
+  mockNoZones: {
+    tagline: 'Una pausa para revisar tu kit.',
+    explanation:
+      'No aplicamos color para «{vibe}»: tu kit y tus preferencias no dejan ninguna zona disponible. Ajusta el kit o vuelve y omítelo para explorar una paleta orientativa.',
+    prep: 'Deja el rostro tal como está; esta receta no aplica maquillaje.',
+    review: 'Revisa qué productos de tu kit son compatibles con tus preferencias.',
+    finish: 'Vuelve al kit para ajustarlo u omítelo antes de crear nuevos looks.',
   },
   errors: {
     generic: 'Algo no salió bien. Puedes intentarlo de nuevo.',

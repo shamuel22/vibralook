@@ -5,12 +5,13 @@
  */
 import { useFocusEffect } from 'expo-router';
 import { Check, Clock3, ScanLine, WandSparkles } from 'lucide-react-native';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, AppState, Platform, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { AppState, StyleSheet, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { recipePalette } from '@/domain/recipe';
 import type { LookRecipe, RenderStatus, VariantKey } from '@/domain/types';
+import { useAccessibilityAnnouncement } from '@/hooks/useAccessibilityAnnouncement';
 import { useT } from '@/i18n';
 import { colors, motion, radius, shadow, space } from '@/theme';
 
@@ -61,7 +62,12 @@ function IndeterminateBar() {
     return () => subscription.remove();
   }, []);
   return (
-    <View style={styles.track} accessible={false} importantForAccessibility="no-hide-descendants">
+    <View
+      style={styles.track}
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
       <Animated.View
         style={[
           styles.shimmer,
@@ -81,17 +87,7 @@ function IndeterminateBar() {
 export function LookProgressCard({ variant, recipe, status, animateProgress = false, onRetry }: LookProgressCardProps) {
   const t = useT();
   const Icon = status === 'error' ? null : ICON[status];
-  const previousStatus = useRef(status);
-  useEffect(() => {
-    // Live regions cover Android. On iOS queue changes without interrupting speech;
-    // initial gallery mounts deliberately do not announce every fixture at once.
-    if (previousStatus.current !== status && Platform.OS === 'ios') {
-      AccessibilityInfo.announceForAccessibilityWithOptions(`${t(`variants.${variant}`)}. ${t(STATUS[status])}`, {
-        queue: true,
-      });
-    }
-    previousStatus.current = status;
-  }, [status, t, variant]);
+  const active = useAccessibilityAnnouncement(`${t(`variants.${variant}`)}. ${t(STATUS[status])}`);
   return (
     <View style={[styles.card, status === 'processing' && styles.processing]}>
       <View style={styles.row}>
@@ -102,7 +98,12 @@ export function LookProgressCard({ variant, recipe, status, animateProgress = fa
               {t(`variants.${variant}`)}
             </AppText>
             {status === 'success' && (
-              <View style={styles.check} accessible={false} importantForAccessibility="no-hide-descendants">
+              <View
+                style={styles.check}
+                accessible={false}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
                 <Check size={space[4]} color={colors.white} strokeWidth={2} />
               </View>
             )}
@@ -117,7 +118,7 @@ export function LookProgressCard({ variant, recipe, status, animateProgress = fa
             <View
               accessible
               accessibilityRole="text"
-              accessibilityLiveRegion="polite"
+              accessibilityLiveRegion={active ? 'polite' : 'none'}
               accessibilityLabel={t(STATUS[status])}
               style={styles.status}
             >
@@ -137,10 +138,10 @@ export function LookProgressCard({ variant, recipe, status, animateProgress = fa
           <View
             accessible
             accessibilityRole="text"
-            accessibilityLiveRegion="polite"
+            accessibilityLiveRegion={active ? 'polite' : 'none'}
             accessibilityLabel={t('creating.statusError')}
           >
-            <View accessible={false} importantForAccessibility="no-hide-descendants">
+            <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
               <InlineNotice tone="error" message={t('creating.statusError')} />
             </View>
           </View>

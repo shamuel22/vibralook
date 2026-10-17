@@ -4,6 +4,7 @@
  */
 import { toggleConstraint } from '@/domain/constraints';
 import { changedZones, preservedZones, withZone } from '@/domain/recipe';
+import type { RecipeText } from '@/services/types';
 import {
   FINISHES_BY_ZONE,
   KIT_MAX_PER_ZONE,
@@ -45,6 +46,9 @@ export type Action =
   | { type: 'edit/copyZone'; zone: Zone; from: VariantKey }
   | { type: 'edit/discard' }
   | { type: 'edit/applyStart'; recipe: LookRecipe }
+  | { type: 'edit/described'; recipe: LookRecipe }
+  | { type: 'edit/cancelApply' }
+  | { type: 'recipes/retext'; texts: Record<string, RecipeText> }
   | { type: 'edit/applySuccess'; recipe: LookRecipe }
   | { type: 'edit/applyError' }
   | { type: 'edit/undo' }
@@ -114,7 +118,15 @@ export function reducer(s: SessionState, a: Action): SessionState {
     case 'kit/toggleShade': {
       const items = s.kit.items[a.zone];
       const exists = items.some((i) => i.shadeId === a.shadeId);
-      if (exists) return { ...s, kit: setKitItems(s.kit, a.zone, items.filter((i) => i.shadeId !== a.shadeId)) };
+      if (exists)
+        return {
+          ...s,
+          kit: setKitItems(
+            s.kit,
+            a.zone,
+            items.filter((i) => i.shadeId !== a.shadeId),
+          ),
+        };
       if (items.length >= KIT_MAX_PER_ZONE) return s;
       const finish = FINISHES_BY_ZONE[a.zone].includes(a.defaultFinish) ? a.defaultFinish : FINISHES_BY_ZONE[a.zone][0];
       return { ...s, kit: setKitItems(s.kit, a.zone, [...items, { shadeId: a.shadeId, finish }]) };
@@ -205,6 +217,21 @@ export function reducer(s: SessionState, a: Action): SessionState {
             changed: changedZones(s.selectedRecipe, a.recipe),
           },
         },
+      };
+    }
+    case 'edit/described':
+      return s.edit.applyingId === a.recipe.id ? { ...s, draftRecipe: a.recipe } : s;
+    case 'edit/cancelApply':
+      return { ...s, edit: { ...s.edit, applyingId: null, failed: false } };
+    case 'recipes/retext': {
+      const re = <T extends LookRecipe | null>(r: T): T => (r && a.texts[r.id] ? { ...r, ...a.texts[r.id] } : r);
+      return {
+        ...s,
+        variants: s.variants.map(re),
+        selectedRecipe: re(s.selectedRecipe),
+        previousRecipe: re(s.previousRecipe),
+        finalRecipe: re(s.finalRecipe),
+        draftRecipe: re(s.draftRecipe),
       };
     }
     case 'edit/applyError':

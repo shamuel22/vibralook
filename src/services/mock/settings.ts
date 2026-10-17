@@ -10,6 +10,8 @@ export interface MockSettings {
   translateLatency: number;
   /** Fail this variant's next render (consumed on use, so "retry" succeeds). */
   failVariantOnce: VariantKey | null;
+  /** Independent one-shot failures; select all three for the all-failed fixture. */
+  failVariantsOnce: Partial<Record<VariantKey, boolean>>;
   /** Fail the next translation call (consumed on use). */
   failTranslateOnce: boolean;
   /** Fail the next edit render (consumed on use). */
@@ -18,10 +20,11 @@ export interface MockSettings {
   selfieIssueOnce: SelfieIssue | null;
 }
 
-const settings: MockSettings = {
+let settings: MockSettings = {
   renderLatency: [1800, 4200],
   translateLatency: 1400,
   failVariantOnce: null,
+  failVariantsOnce: {},
   failTranslateOnce: false,
   failEditOnce: false,
   selfieIssueOnce: null,
@@ -35,7 +38,8 @@ export function getMockSettings(): Readonly<MockSettings> {
 }
 
 export function updateMockSettings(patch: Partial<MockSettings>): void {
-  Object.assign(settings, patch);
+  if (Object.entries(patch).every(([key, value]) => Object.is(settings[key as keyof MockSettings], value))) return;
+  settings = { ...settings, ...patch };
   listeners.forEach((l) => l());
 }
 
@@ -47,7 +51,20 @@ export function subscribeMockSettings(l: Listener): () => void {
 /** Read-and-clear helper for the `*Once` flags. */
 export function consume<K extends keyof MockSettings>(key: K, reset: MockSettings[K]): MockSettings[K] {
   const value = settings[key];
-  settings[key] = reset;
-  listeners.forEach((l) => l());
+  if (!Object.is(value, reset)) {
+    settings = { ...settings, [key]: reset };
+    listeners.forEach((l) => l());
+  }
   return value;
+}
+
+export function consumeVariantFailure(variant: VariantKey): boolean {
+  const mapped = settings.failVariantsOnce[variant] === true;
+  const single = settings.failVariantOnce === variant;
+  if (!mapped && !single) return false;
+  updateMockSettings({
+    failVariantsOnce: { ...settings.failVariantsOnce, [variant]: false },
+    failVariantOnce: single ? null : settings.failVariantOnce,
+  });
+  return true;
 }

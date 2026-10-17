@@ -111,6 +111,7 @@ export function ZoneEditor({
               transitionTimingFunction: cssEasing.standard,
             }}
             accessible={false}
+            accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
           >
             <ChevronDown size={space[6]} color={colors.ink} strokeWidth={1.75} />
@@ -272,7 +273,11 @@ export function ZoneEditor({
                       style={[styles.copy, disabled && styles.disabled]}
                       pressedStyle={styles.pressed}
                     >
-                      <View accessible={false} importantForAccessibility="no-hide-descendants">
+                      <View
+                        accessible={false}
+                        accessibilityElementsHidden
+                        importantForAccessibility="no-hide-descendants"
+                      >
                         <Swatch shadeId={other.zone.shadeId} size="sm" />
                       </View>
                       <AppText variant="labelStrong" style={styles.copyLabel}>

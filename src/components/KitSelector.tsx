@@ -19,6 +19,7 @@ import { useT } from '@/i18n';
 import { colors, radius, shadow, space } from '@/theme';
 
 import { AppText } from './AppText';
+import { Button } from './Button';
 import { ChoiceChips } from './ChoiceChips';
 import { InlineNotice } from './InlineNotice';
 import { Swatch, shadeLabel } from './Swatch';
@@ -38,9 +39,10 @@ export function KitSelector({ zone, items, constraints, onToggleShade, onSetFini
   const zoneReason = t('kit.blockedByConstraint', { constraint: t('intent.constraints.noShadow') });
   const finishReason = t('kit.finishBlocked', { constraint: t('intent.constraints.noShine') });
   const atLimit = items.length >= KIT_MAX_PER_ZONE;
+  const usableCount = allowed ? items.filter((item) => isFinishAllowed(item.finish, constraints)).length : 0;
   return (
     <View style={styles.card}>
-      <View style={[styles.content, !allowed && styles.dimmed]}>
+      <View style={styles.content}>
         <View style={styles.heading}>
           <ZoneIcon zone={zone} />
           <View style={styles.flex}>
@@ -49,12 +51,12 @@ export function KitSelector({ zone, items, constraints, onToggleShade, onSetFini
           </View>
         </View>
         <AppText variant="label">
-          {t('kit.zoneHint', { max: KIT_MAX_PER_ZONE })} {t('kit.selectedCount', { count: items.length })}
+          {t('kit.zoneHint', { max: KIT_MAX_PER_ZONE })} {t('kit.selectedCount', { count: usableCount })}
         </AppText>
         <View style={styles.swatches}>
           {shadesForZone(zone).map((shade) => {
             const selected = items.some((item) => item.shadeId === shade.id);
-            const disabled = !allowed || (!selected && atLimit);
+            const disabled = !selected && (!allowed || atLimit);
             return (
               <Swatch
                 key={shade.id}
@@ -79,6 +81,16 @@ export function KitSelector({ zone, items, constraints, onToggleShade, onSetFini
                 {shadeLabel(t, item.shadeId)}
               </AppText>
             </View>
+            {(!allowed || !isFinishAllowed(item.finish, constraints)) && (
+              <InlineNotice message={t('kit.retainedBlocked', { reason: !allowed ? zoneReason : finishReason })} />
+            )}
+            <Button
+              variant="secondary"
+              compact
+              arrow={false}
+              label={t('kit.removeItem', { shade: shadeLabel(t, item.shadeId) })}
+              onPress={() => onToggleShade(item.shadeId)}
+            />
             <ChoiceChips
               label={`${shadeLabel(t, item.shadeId)} · ${t('kit.finishLabel')}`}
               value={item.finish}
@@ -104,7 +116,6 @@ export function KitSelector({ zone, items, constraints, onToggleShade, onSetFini
 const styles = StyleSheet.create({
   card: { backgroundColor: colors.white, borderRadius: radius.md, padding: space[4], gap: space[4], ...shadow.card },
   content: { gap: space[3] },
-  dimmed: { opacity: 0.55 },
   heading: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
   flex: { flex: 1, minWidth: 0 },
   swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },

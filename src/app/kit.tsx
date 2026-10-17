@@ -19,7 +19,7 @@ import {
   Screen,
   SecondaryButton,
 } from '@/components';
-import { allowedFinishes } from '@/domain/constraints';
+import { allowedFinishes, isFinishAllowed, isZoneAllowed } from '@/domain/constraints';
 import type { Zone } from '@/domain/types';
 import { useT } from '@/i18n';
 import { useSession } from '@/state/session';
@@ -35,7 +35,16 @@ export default function KitScreen() {
 
   if (!sourceImage) return <Redirect href="/selfie" />;
 
-  const total = ZONE_ORDER.reduce((n, z) => n + kit.items[z].length, 0);
+  const total = ZONE_ORDER.reduce(
+    (n, z) =>
+      n +
+      (isZoneAllowed(z, constraints)
+        ? kit.items[z].filter((item) => isFinishAllowed(item.finish, constraints)).length
+        : 0),
+    0,
+  );
+  const hasRetainedItems = ZONE_ORDER.some((zone) => kit.items[zone].length > 0);
+  const unusableKit = hasRetainedItems && total === 0;
 
   const proceed = (mode: 'declare' | 'skip') => {
     if (mode === 'declare' && total === 0) {
@@ -53,7 +62,9 @@ export default function KitScreen() {
       footer={
         <ButtonRow
           secondary={<SecondaryButton label={t('kit.skip')} arrow={false} onPress={() => proceed('skip')} />}
-          primary={<PrimaryButton label={t('kit.continue')} onPress={() => proceed('declare')} />}
+          primary={
+            <PrimaryButton label={t('kit.continue')} disabled={unusableKit} onPress={() => proceed('declare')} />
+          }
         />
       }
     >
@@ -70,7 +81,12 @@ export default function KitScreen() {
           <AppText variant="h3">{t('kit.photoReadyTitle')}</AppText>
           <AppText variant="label">{t('kit.photoReadyBody')}</AppText>
         </View>
-        <View style={styles.check} accessible={false} importantForAccessibility="no-hide-descendants">
+        <View
+          style={styles.check}
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
           <Check color={colors.white} size={16} strokeWidth={2.5} />
         </View>
       </View>
@@ -95,6 +111,7 @@ export default function KitScreen() {
       ))}
 
       {emptyError ? <InlineNotice tone="error" focusOnMount message={t('kit.emptyDeclared')} /> : null}
+      {unusableKit ? <InlineNotice tone="info" message={t('kit.noUsableItems')} /> : null}
       <InlineNotice tone="info" message={t('kit.approximation')} />
     </Screen>
   );

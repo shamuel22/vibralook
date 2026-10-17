@@ -34,7 +34,7 @@ export function ResultRecipe({ steps, imageUri, paletteSource }: ResultRecipePro
   const stacked = fontScale >= 1.3;
   return (
     <View style={styles.recipe}>
-      <AppText variant="eyebrow" accessibilityRole="header">
+      <AppText variant="labelStrong" accessibilityRole="header">
         {t('result.howTo')}
       </AppText>
       <View accessibilityRole="list" style={styles.list}>
@@ -54,6 +54,7 @@ export function ResultRecipe({ steps, imageUri, paletteSource }: ResultRecipePro
               <View
                 style={[styles.stepHeader, stacked && styles.stackedHeader]}
                 accessible={false}
+                accessibilityElementsHidden
                 importantForAccessibility="no-hide-descendants"
               >
                 <View style={[styles.number, { width: numberSize, height: numberSize }]}>

@@ -92,6 +92,7 @@ export function RibbonAccent({ placement = 'bottom', height = 140, style }: Ribb
     <View
       pointerEvents="none"
       accessible={false}
+      accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={[styles.wrap, placement === 'bottom' ? styles.bottom : styles.top, { height }, style]}
     >

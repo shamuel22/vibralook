@@ -2,7 +2,7 @@
  * Dev gallery — QA surface for tokens, type, shades, mock knobs and (from Etapa 2)
  * every component state. Not linked from the product UI except the dev menu entry.
  */
-import { Link, Stack } from 'expo-router';
+import { Link, Redirect, Stack } from 'expo-router';
 import { Camera, Clock, Image as ImageIcon, SlidersHorizontal, Sun } from 'lucide-react-native';
 import { useState, useSyncExternalStore } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -52,6 +52,7 @@ function Toggle({ label, on, onPress }: { label: string; on: boolean; onPress: (
   return (
     <Pressable
       accessibilityRole="switch"
+      accessibilityLabel={label}
       accessibilityState={{ checked: on }}
       onPress={onPress}
       style={[styles.toggle, on && styles.toggleOn]}
@@ -64,7 +65,7 @@ function Toggle({ label, on, onPress }: { label: string; on: boolean; onPress: (
   );
 }
 
-export default function DevGallery() {
+function GalleryContents() {
   const { t, locale, setLocale } = useI18n();
   const mock = useSyncExternalStore(subscribeMockSettings, getMockSettings);
   const [time, setTime] = useState<5 | 10 | 20>(10);
@@ -106,7 +107,13 @@ export default function DevGallery() {
           <Button label={t('looks.choose')} disabled onPress={() => {}} />
           <Button variant="secondary" label={t('kit.skip')} disabled onPress={() => {}} />
           <View style={styles.row}>
-            <Button compact variant="secondary" arrow={false} label={t('edit.keep', { zone: t('kit.zones.eyes') })} onPress={() => {}} />
+            <Button
+              compact
+              variant="secondary"
+              arrow={false}
+              label={t('edit.keep', { zone: t('kit.zones.eyes') })}
+              onPress={() => {}}
+            />
             <Button compact arrow={false} label={t('edit.seeChange')} onPress={() => {}} />
           </View>
         </Section>
@@ -116,7 +123,11 @@ export default function DevGallery() {
             label={t('intent.timeLabel')}
             value={time}
             onChange={setTime}
-            options={[5, 10, 20].map((m) => ({ value: m as 5 | 10 | 20, label: t('common.minutes', { count: m }), icon: Clock }))}
+            options={[5, 10, 20].map((m) => ({
+              value: m as 5 | 10 | 20,
+              label: t('common.minutes', { count: m }),
+              icon: Clock,
+            }))}
           />
           <ChoiceChips
             label={t('intent.intensityLabel')}
@@ -136,7 +147,12 @@ export default function DevGallery() {
             options={[
               { value: 'noShadow', label: t('intent.constraints.noShadow') },
               { value: 'noShine', label: t('intent.constraints.noShine'), icon: Sun },
-              { value: 'discreetLips', label: t('intent.constraints.discreetLips'), disabled: true, disabledReason: 'Ejemplo inhabilitado' },
+              {
+                value: 'discreetLips',
+                label: t('intent.constraints.discreetLips'),
+                disabled: true,
+                disabledReason: 'Ejemplo inhabilitado',
+              },
             ]}
           />
         </Section>
@@ -159,8 +175,15 @@ export default function DevGallery() {
         <Section title="InlineNotice">
           <InlineNotice tone="privacy" message={t('selfie.prepare.privacy')} />
           <InlineNotice tone="info" message={t('kit.approximation')} />
-          <InlineNotice tone="success" message={t('edit.summaryOne', { kept: 'los ojos y las mejillas', changed: 'los labios' })} />
-          <InlineNotice tone="error" message={t('creating.statusError')} action={{ label: t('looks.retry'), onPress: () => {} }} />
+          <InlineNotice
+            tone="success"
+            message={t('edit.summaryOne', { kept: 'los ojos y las mejillas', changed: 'los labios' })}
+          />
+          <InlineNotice
+            tone="error"
+            message={t('creating.statusError')}
+            action={{ label: t('looks.retry'), onPress: () => {} }}
+          />
         </Section>
 
         <Section title="ArtPlaceholder + SimulationSeal">
@@ -226,14 +249,16 @@ export default function DevGallery() {
         </Section>
 
         <Section title="Mock · forzar estados">
-          <AppText variant="label">Fallar el próximo render de una variante</AppText>
+          <AppText variant="label">{t('dev.failVariants')}</AppText>
           <View style={styles.wrap}>
             {VARIANTS.map((v) => (
               <Toggle
                 key={v}
                 label={t(`variants.${v}` as TKey)}
-                on={mock.failVariantOnce === v}
-                onPress={() => updateMockSettings({ failVariantOnce: mock.failVariantOnce === v ? null : v })}
+                on={mock.failVariantsOnce[v] === true}
+                onPress={() =>
+                  updateMockSettings({ failVariantsOnce: { ...mock.failVariantsOnce, [v]: !mock.failVariantsOnce[v] } })
+                }
               />
             ))}
           </View>
@@ -273,6 +298,10 @@ export default function DevGallery() {
   );
 }
 
+export default function DevGallery() {
+  return __DEV__ ? <GalleryContents /> : <Redirect href="/" />;
+}
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.cream },
   body: { padding: layout.gutter, gap: space[8], paddingBottom: space[16] },
@@ -294,8 +323,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   toggleOn: { backgroundColor: colors.ink },
-  linkOut: { padding: space[4], borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white },
+  linkOut: {
+    padding: space[4],
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.white,
+  },
   frame: { borderWidth: 1, borderColor: colors.line, borderRadius: radius.sm },
   thumb: { width: 88 },
-  ribbonFrame: { height: 160, borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.cream, borderWidth: 1, borderColor: colors.line },
+  ribbonFrame: {
+    height: 160,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    backgroundColor: colors.cream,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
 });

@@ -24,6 +24,7 @@ import { useT } from '@/i18n';
 import { allVariantsSettled, anyVariantReady, jobFor, variantRecipe } from '@/state/selectors';
 import { useSession } from '@/state/session';
 import { colors, easing, motion, radius, space } from '@/theme';
+import { useCancelOnLeave } from '@/hooks/useCancelOnLeave';
 
 function ProgressEntrance({ index, children }: { index: number; children: ReactNode }) {
   const reduced = useReducedMotion();
@@ -55,6 +56,9 @@ export default function CreatingScreen() {
   const shimmerVariant = VARIANTS.find(
     (variant) => jobFor(state, variantRecipe(state, variant))?.status === 'processing',
   );
+
+  // Back (gesture or Android button) while interpreting cancels the request before leaving.
+  useCancelOnLeave(translating, actions.cancelInFlight);
 
   useFocusEffect(
     useCallback(() => {
@@ -139,7 +143,12 @@ export default function CreatingScreen() {
             <AppText variant="h3" style={styles.headingText}>
               {t('creating.guidePhotoTitle')}
             </AppText>
-            <View style={styles.badge} accessible={false} importantForAccessibility="no-hide-descendants">
+            <View
+              style={styles.badge}
+              accessible={false}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            >
               <Check size={space[4]} color={colors.white} strokeWidth={2} />
             </View>
           </View>

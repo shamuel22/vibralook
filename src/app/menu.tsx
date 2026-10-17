@@ -13,9 +13,26 @@ import { useI18n } from '@/i18n';
 import { useSession } from '@/state/session';
 import { colors, layout, radius, space } from '@/theme';
 
-function Row({ icon: Icon, label, onPress }: { icon: typeof Info; label: string; onPress: () => void }) {
+function Row({
+  icon: Icon,
+  label,
+  onPress,
+  expanded,
+}: {
+  icon: typeof Info;
+  label: string;
+  onPress: () => void;
+  expanded?: boolean;
+}) {
   return (
-    <PressableScale accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.row} pressedStyle={styles.rowPressed}>
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ expanded }}
+      onPress={onPress}
+      style={styles.row}
+      pressedStyle={styles.rowPressed}
+    >
       <Icon color={colors.ink} size={20} strokeWidth={1.75} />
       <AppText variant="bodyStrong" style={styles.rowLabel}>
         {label}
@@ -66,7 +83,12 @@ export default function MenuSheet() {
       </View>
 
       <View style={styles.list}>
-        <Row icon={Info} label={t('menu.photoUse')} onPress={() => setShowPhotoUse((v) => !v)} />
+        <Row
+          icon={Info}
+          label={t('menu.photoUse')}
+          expanded={showPhotoUse}
+          onPress={() => setShowPhotoUse((v) => !v)}
+        />
         {showPhotoUse && <InlineNotice tone="privacy" message={t('menu.photoUseBody')} />}
         <Row icon={RotateCcw} label={t('menu.startOver')} onPress={startOver} />
         {__DEV__ && (

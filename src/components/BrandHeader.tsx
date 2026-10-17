@@ -77,13 +77,20 @@ export function BrandHeader({ hideBack, backLocked, onBack, stage, tone = 'defau
         </View>
       </View>
       {stage ? (
-        <View style={styles.progress} accessible accessibilityLabel={t('common.stepOf', { current: stepIndex, total: STAGES.length })}>
-          <View style={styles.dots} importantForAccessibility="no-hide-descendants">
+        <View
+          style={styles.progress}
+          accessible
+          accessibilityLabel={`${t('common.stepOf', { current: stepIndex, total: STAGES.length })} · ${t(`stages.${stage}`)}`}
+        >
+          <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             {STAGES.map((s, i) => (
-              <View key={s} style={[styles.dot, i < stepIndex && styles.dotDone, i === stepIndex - 1 && styles.dotCurrent]} />
+              <View
+                key={s}
+                style={[styles.dot, i < stepIndex && styles.dotDone, i === stepIndex - 1 && styles.dotCurrent]}
+              />
             ))}
           </View>
-          <AppText variant="label" color={tone === 'onDark' ? colors.white : colors.muted}>
+          <AppText variant="label" color={tone === 'onDark' ? colors.white : colors.muted} style={styles.progressText}>
             {t('common.stepOf', { current: stepIndex, total: STAGES.length })} · {t(`stages.${stage}`)}
           </AppText>
         </View>
@@ -106,8 +113,15 @@ const styles = StyleSheet.create({
   locked: { opacity: 0.35 },
   logoWrap: { flex: 1, alignItems: 'center' },
   logo: { height: 22, width: Math.round(22 * LOGO_ASPECT) },
-  progress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[2], paddingBottom: space[1] },
+  progress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space[2],
+    paddingBottom: space[1],
+  },
   dots: { flexDirection: 'row', gap: space[1] },
+  progressText: { flex: 1, minWidth: 0 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.line },
   dotDone: { backgroundColor: colors.rose },
   dotCurrent: { width: 16, backgroundColor: colors.ink },

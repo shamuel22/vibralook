@@ -43,7 +43,12 @@ function CameraControl({
       containerStyle={styles.controlWrap}
       style={styles.control}
     >
-      <View style={styles.controlIcon} accessible={false} importantForAccessibility="no-hide-descendants">
+      <View
+        style={styles.controlIcon}
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
         <Icon size={space[6]} color={colors.ink} strokeWidth={1.75} />
       </View>
       <AppText variant="label" align="center" color={colors.white}>
@@ -72,7 +77,7 @@ function CameraHint({ ready }: { ready: boolean }) {
   };
   return (
     <View style={styles.hint} accessible accessibilityRole="text" accessibilityLabel={showLight ? lighting : searching}>
-      <View importantForAccessibility="no-hide-descendants" accessible={false}>
+      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" accessible={false}>
         <AppText variant="label" align="center" style={styles.measureHint}>
           {searching.length > lighting.length ? searching : lighting}
         </AppText>
@@ -244,6 +249,7 @@ export default function CameraScreen() {
             mirror={false}
             animateShutter={false}
             accessible={false}
+            accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
             onCameraReady={() => setStatus((current) => (current === 'starting' ? 'ready' : current))}
             onMountError={() => {

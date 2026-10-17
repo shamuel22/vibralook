@@ -26,6 +26,7 @@ import {
 } from '@/components';
 import type { Violation } from '@/domain/constraints';
 import { ZONES, type Zone } from '@/domain/types';
+import { useCancelOnLeave } from '@/hooks/useCancelOnLeave';
 import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { joinList, useT } from '@/i18n';
 import { imageFor, isSimulated } from '@/state/selectors';
@@ -49,6 +50,9 @@ export default function EditScreen() {
   useEffect(() => {
     if (edit.failed) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   }, [edit.failed]);
+
+  // Leaving mid-edit cancels it; the last valid look stays selected.
+  useCancelOnLeave(edit.applyingId !== null, actions.cancelEdit);
 
   if (!sourceImage) return <Redirect href="/selfie" />;
   if (!selectedRecipe) return <Redirect href="/looks" />;
@@ -154,7 +158,7 @@ export default function EditScreen() {
           accessible={showBefore}
           accessibilityLabel={t('selfie.review.photoAlt')}
         />
-        {!showBefore && isSimulated(state, selectedRecipe) ? <SimulationSeal compact style={styles.seal} /> : null}
+        {!showBefore && isSimulated(state, selectedRecipe) ? <SimulationSeal style={styles.seal} /> : null}
         <PressableScale
           accessibilityRole="switch"
           accessibilityLabel={t('compare.showBefore')}
@@ -166,18 +170,18 @@ export default function EditScreen() {
             {showBefore ? t('compare.after') : t('compare.showBefore')}
           </AppText>
         </PressableScale>
-        {applying ? (
-          <View style={styles.applying} accessibilityLiveRegion="polite">
-            <ActivityIndicator color={colors.white} size="small" animating={motionAllowed} />
-            <AppText variant="labelStrong" color={colors.white}>
-              {t('edit.applying')}
-            </AppText>
-          </View>
-        ) : null}
       </View>
+      {applying ? (
+        <View style={styles.applying} accessibilityLiveRegion="polite">
+          <ActivityIndicator color={colors.white} size="small" animating={motionAllowed} />
+          <AppText variant="labelStrong" color={colors.white}>
+            {t('edit.applying')}
+          </AppText>
+        </View>
+      ) : null}
 
       {summary && !draftRecipe && !applying ? <InlineNotice tone="success" message={summary} /> : null}
-      {edit.undone ? <InlineNotice tone="info" message={t('edit.undone')} /> : null}
+      {edit.undone ? <InlineNotice tone="info" announce message={t('edit.undone')} /> : null}
       {edit.failed ? (
         <InlineNotice
           tone="error"
@@ -224,7 +228,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.creamDeep,
   },
-  seal: { position: 'absolute', left: space[3], bottom: space[3] },
+  seal: { position: 'absolute', left: 0, right: 0, bottom: 0, borderRadius: 0 },
   beforeBtn: {
     position: 'absolute',
     top: space[3],
@@ -237,9 +241,7 @@ const styles = StyleSheet.create({
   },
   beforeBtnOn: { backgroundColor: colors.white },
   applying: {
-    position: 'absolute',
-    alignSelf: 'center',
-    bottom: space[4],
+    alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[2],
