@@ -15,7 +15,7 @@ import { colors, radius, space } from '@/theme';
 
 import { AppText } from './AppText';
 
-const LOGO = require('../../assets/brand/vl_logo_horizontal@3x.png');
+const LOGO = require('../../assets/brand/vl_logo_horizontal.png');
 export const LOOK_CARD_WIDTH = 360;
 
 export interface LookCardProps {

@@ -199,7 +199,11 @@ export function reducer(s: SessionState, a: Action): SessionState {
           applyingId: null,
           failed: false,
           undone: false,
-          lastChange: { kept: preservedZones(s.selectedRecipe, a.recipe), changed: changedZones(s.selectedRecipe, a.recipe) },
+          // Zones outside the look are neither "kept" nor "changed" for the person.
+          lastChange: {
+            kept: preservedZones(s.selectedRecipe, a.recipe).filter((z) => a.recipe[z].enabled),
+            changed: changedZones(s.selectedRecipe, a.recipe),
+          },
         },
       };
     }

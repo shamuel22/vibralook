@@ -78,36 +78,24 @@ export default function ResultScreen() {
     <Screen
       header={{ stage: 'result' }}
       footer={
-        <View style={styles.footer}>
+        <View style={styles.row}>
+          <SecondaryButton
+            label={t('result.share')}
+            icon={Share2}
+            arrow={false}
+            loading={sharing}
+            onPress={shareCard}
+            style={styles.flex}
+          />
           <PrimaryButton
             label={t('result.save')}
             icon={Bookmark}
+            arrow={false}
             loading={save === 'saving'}
             loadingLabel={t('result.saving')}
             onPress={saveCard}
+            style={styles.flex2}
           />
-          <View style={styles.row}>
-            <SecondaryButton
-              label={t('result.share')}
-              icon={Share2}
-              arrow={false}
-              loading={sharing}
-              onPress={shareCard}
-              style={styles.flex}
-              compact
-            />
-            <SecondaryButton
-              label={t('result.newVibe')}
-              arrow={false}
-              onPress={() => {
-                actions.startOver();
-                router.dismissAll();
-                router.replace('/');
-              }}
-              style={styles.flex}
-              compact
-            />
-          </View>
         </View>
       }
     >
@@ -146,6 +134,16 @@ export default function ResultScreen() {
 
       <InlineNotice tone="info" message={t('result.approximation')} />
 
+      <SecondaryButton
+        label={t('result.newVibe')}
+        arrow={false}
+        onPress={() => {
+          actions.startOver();
+          router.dismissAll();
+          router.replace('/');
+        }}
+      />
+
       {/* Off-screen source of the PNG card; captured, never shown or read twice. */}
       <View style={styles.offscreen} pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants">
         <LookCard ref={card} recipe={finalRecipe} imageUri={image} simulated={simulated} />
@@ -157,7 +155,7 @@ export default function ResultScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   row: { flexDirection: 'row', gap: space[3] },
-  footer: { gap: space[2] },
+  flex2: { flex: 1.5 },
   paletteRow: {
     flexDirection: 'row',
     alignItems: 'center',
