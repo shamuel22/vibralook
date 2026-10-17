@@ -10,8 +10,9 @@ import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated'
 
 import { AppText, ArtPlaceholder, InlineNotice, PrimaryButton, RibbonAccent, Screen } from '@/components';
 import { useT, type TKey } from '@/i18n';
+import { useMotionAllowed } from '@/hooks/useMotionAllowed';
 import { useOnboarding } from '@/state/onboarding';
-import { colors, easing, layout, motion, space } from '@/theme';
+import { colors, easing, layout, motion, radius, space } from '@/theme';
 
 const SYMBOL = require('../../assets/brand/vl_symbol.png');
 const STEPS = [1, 2, 3] as const;
@@ -26,6 +27,8 @@ export default function WelcomeScreen() {
   const t = useT();
   const reduceMotion = useReducedMotion();
   const { markSeen } = useOnboarding();
+  // The hero loops: it pauses with reduced motion, off-screen or in the background.
+  const motionAllowed = useMotionAllowed();
 
   const start = () => {
     markSeen();
@@ -40,7 +43,19 @@ export default function WelcomeScreen() {
       footer={<PrimaryButton label={t('onboarding.cta')} onPress={start} />}
     >
       <View style={styles.hero}>
-        <ArtPlaceholder id="vl_onboarding_hero_v01" aspectRatio={4 / 5} decorative style={styles.heroArt} />
+        <ArtPlaceholder
+          id="vl_onboarding_hero_comparacion_v03"
+          aspectRatio={4 / 5}
+          decorative
+          autoplay={motionAllowed}
+          style={styles.heroArt}
+        />
+        {/* Honesty: this is an illustration, not a virtual try-on of the person using the app. */}
+        <View style={styles.caption} accessible accessibilityLabel={t('onboarding.illustrative')}>
+          <AppText variant="label" color={colors.white}>
+            {t('onboarding.illustrative')}
+          </AppText>
+        </View>
         {/* Approved brand symbol anchors the hero while the artwork is pending. */}
         <View
           style={styles.badge}
@@ -96,6 +111,15 @@ const styles = StyleSheet.create({
   // Full bleed: the ribbons run off the screen edge instead of stopping at the gutter.
   hero: { marginHorizontal: -layout.gutter, alignItems: 'center' },
   heroArt: { width: '100%', borderRadius: 0 },
+  caption: {
+    position: 'absolute',
+    top: space[3],
+    right: layout.gutter,
+    backgroundColor: colors.inkScrim,
+    borderRadius: radius.pill,
+    paddingHorizontal: space[3],
+    paddingVertical: space[1],
+  },
   badge: {
     position: 'absolute',
     bottom: -space[6],

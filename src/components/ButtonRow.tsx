@@ -1,6 +1,6 @@
 /**
  * Footer pair of actions. Side by side when they fit; stacked (primary first) at large
- * font scales or narrow widths so labels never break mid-word.
+ * font scales or narrow widths. Labels never break mid-word.
  */
 import type { ReactNode } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -27,7 +27,7 @@ export function ButtonRow({ secondary, primary }: { secondary?: ReactNode; prima
   return (
     <View style={styles.row}>
       {secondary ? <View style={styles.secondary}>{secondary}</View> : null}
-      <View style={secondary ? styles.primary : styles.secondary}>{primary}</View>
+      <View style={styles.primary}>{primary}</View>
     </View>
   );
 }
@@ -35,6 +35,8 @@ export function ButtonRow({ secondary, primary }: { secondary?: ReactNode; prima
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: space[3] },
   column: { gap: space[2] },
-  secondary: { flex: 1 },
-  primary: { flex: 1.5 },
+  // The secondary keeps its natural width so its label never breaks mid-word ("Rept/ir");
+  // the primary takes the rest and may wrap between words if it must.
+  secondary: { flexShrink: 0 },
+  primary: { flex: 1, minWidth: 0 },
 });

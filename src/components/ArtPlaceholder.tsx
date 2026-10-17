@@ -15,6 +15,7 @@ import { colors, radius, space } from '@/theme';
 import { AppText } from './AppText';
 
 export type ArtId =
+  | 'vl_onboarding_hero_comparacion_v03'
   | 'vl_onboarding_hero_v01'
   | 'vl_intencion_escena_jazz_v01'
   | 'vl_intencion_escena_sakura_v01'
@@ -31,6 +32,8 @@ export type ArtId =
  * `vl_cintas_pie_v01` is used directly by RibbonAccent, not through this component.
  */
 const ART_REGISTRY: Partial<Record<ArtId, number>> = {
+  // Animated GIF (before/after illustration) chosen by the team for onboarding.
+  vl_onboarding_hero_comparacion_v03: require('../../assets/art/vl_onboarding_hero_comparacion_v03.gif'),
   vl_onboarding_hero_v01: require('../../assets/art/vl_onboarding_hero_v01.webp'),
   vl_intencion_escena_jazz_v01: require('../../assets/art/vl_intencion_escena_jazz_v01.webp'),
   vl_intencion_escena_sakura_v01: require('../../assets/art/vl_intencion_escena_sakura_v01.webp'),
@@ -52,6 +55,8 @@ export interface ArtPlaceholderProps {
   style?: StyleProp<ViewStyle>;
   /** Hide the id/label (e.g. very small slots); the dashed frame still marks it as pending. */
   compact?: boolean;
+  /** Animated art only: play when true (callers pass `useMotionAllowed()`); otherwise first frame. */
+  autoplay?: boolean;
 }
 
 export function ArtPlaceholder({
@@ -62,6 +67,7 @@ export function ArtPlaceholder({
   contentFit = 'cover',
   style,
   compact,
+  autoplay = false,
 }: ArtPlaceholderProps) {
   const t = useT();
   const final = ART_REGISTRY[id];
@@ -71,6 +77,7 @@ export function ArtPlaceholder({
       <Image
         source={final}
         contentFit={contentFit}
+        autoplay={autoplay}
         // Same frame as the placeholder (full width, rounded), so swapping in art never shifts layout.
         style={[styles.final, { aspectRatio }, style as object]}
         accessible={!decorative}

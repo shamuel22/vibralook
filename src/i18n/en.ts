@@ -31,6 +31,7 @@ const en: Dictionary = {
     step3Title: 'Make it yours',
     step3Body: 'Change one area without losing what you love, and take the steps with you.',
     cta: 'Get started',
+    illustrative: 'Illustrative image',
   },
   stages: {
     vibe: 'Vibe',

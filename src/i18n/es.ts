@@ -30,6 +30,7 @@ const es = {
     step3Title: 'Hazlo tuyo',
     step3Body: 'Ajusta una zona sin perder lo que te gusta y llévate los pasos.',
     cta: 'Empezar',
+    illustrative: 'Imagen ilustrativa',
   },
   stages: {
     vibe: 'Vibra',
