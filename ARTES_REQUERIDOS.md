@@ -2,7 +2,7 @@
 
 **Versión 2 · 17-oct-2026 (añade A0, ilustración de bienvenida) · Fase 1 (UI/UX) · App móvil Expo (iOS y Android)**
 
-> **Estado (17-oct-2026): entregados e integrados A0–A8** (paquete `VIBRA_LOOK_ARTES_v01/`). WebP de producción en `assets/art/`, registrados en `ART_REGISTRY`; A8 integrado en `RibbonAccent`. Revisados en dispositivo contra los criterios de §3. Según `VIBRA_LOOK_ARTES_v01/documentacion/prompts.md`, las piezas se crearon con una herramienta de generación de imágenes; no contienen personas, texto ni marcas.
+> **Estado (17-oct-2026): entregados e integrados A0–A8** (paquete `VIBRA_LOOK_ARTES_v01/`, retirado del repo el 17-oct-2026; queda en el historial de git). WebP de producción en `assets/art/`, registrados en `ART_REGISTRY`; A8 integrado en `RibbonAccent`. Revisados en dispositivo contra los criterios de §3. Según `documentacion/prompts.md` del paquete, las piezas se crearon con una herramienta de generación de imágenes; no contienen personas, texto ni marcas.
 
 > **Cambio (17-oct-2026):** por decisión del equipo, el héroe de bienvenida usa `assets/art/vl_onboarding_hero_comparacion_v03.gif` (480×600, 96 cuadros, bucle) en lugar de A0 v01, que se conserva en el repo. Muestra un antes/después de maquillaje sobre un rostro, así que lleva un rótulo discreto en letra pequeña «Imagen ilustrativa» para no confundirse con una prueba virtual. **En revisión con el equipo de diseño:** el cabello aparece cortado en el borde superior del propio GIF; la app no lo recorta ni lo altera. Se pausa con movimiento reducido, en segundo plano o fuera de pantalla. Pendiente: confirmar el permiso de uso del retrato y, si es posible, una versión de más resolución (≥1080×1350) en WebP animado.
 

@@ -7,6 +7,6 @@ module.exports = defineConfig([
   expoConfig,
   prettier,
   {
-    ignores: ['dist/*', '.expo/*', '.claude/*', 'node_modules/*', 'VIBRA_LOOK_ARTES_v01/*'],
+    ignores: ['dist/*', '.expo/*', '.claude/*', 'node_modules/*', 'vibralook-api/*'],
   },
 ]);

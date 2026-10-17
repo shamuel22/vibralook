@@ -174,16 +174,20 @@ Hecho con llamadas reales; costó 3 unidades (saldo 1.040 → 1.037). Imagen: mu
 **Reglas de compilación fijadas (no alteran rasgos, DESIGN.md §1 y §9.3):** siempre `skin_smooth {0,0}`; `lip_color.shape = original`, `morphology {fullness:0, wrinkless:0}`, `style.type = full`. Nunca se usan `foundation`, `contour` ni formas de labio alternativas.
 
 **Lista blanca inicial** (se amplía solo tras probarla con rostros reales):
-- `eye_shadow`: patrones `1color1` (Susurro/Equilibrio) y `2colors1` (Declaración, segundo tono derivado más profundo). Acabados: mate → `matte`; satinado → `shimmer` con brillo bajo; metálico → `metallic`.
-- `blush`: patrón `1color1`. Acabados: mate → `matte`; satinado → `satin` (`glowStrength`); luminoso → `shimmer`.
-- `lip_color`: mate → `matte`; satinado → `satin`; brillo → `gloss` (`gloss`, `transparencyIntensity`).
+- `eye_shadow`: patrón `1color1` (párpado y pliegue) en las tres variantes; la expresividad viene de la intensidad. `2colors1` se probó con un rostro real y queda pegado a la línea de pestañas, más débil que el simple: fuera de la lista hasta probar otros patrones de dos tonos (p. ej. `2colors6`) con fotos de frente y expresión neutra. Acabados: mate → `matte`; satinado → `shimmer` (intensidad 20); metálico → `metallic` (shimmer 45, metálico 55).
+- `blush`: patrón `1color1`. Acabados: mate → `matte`; satinado → `satin` (`glowStrength` 35); luminoso → `shimmer` (glow 50, densidad 35).
+- `lip_color`: mate → `matte`; satinado → `satin`; brillo → `gloss` (`gloss` 60, `transparencyIntensity` 25).
 - Intensidad de zona 1–5 → `colorIntensity` 25/40/55/70/85 (a calibrar con fotos reales).
+
+**Prueba con foto real del equipo (17-oct-2026, 10 unidades en total; saldo 1.026).** Los tres looks de muestra (todos los acabados) fueron aceptados por YouCam y conservan pecas, dientes, textura y encuadre; el brillo de labios y el vino mate se leen bien. Calibración pendiente con selfies de frente, más cercanas y con expresión neutra (la foto de prueba es de medio cuerpo y sonriendo, con los párpados poco visibles): intensidad de ojos y patrones de dos tonos. Las fotos de prueba del equipo no se versionan (`/assets/equipo*.jpg` en `.gitignore`).
+
+**Motor de traducción: DeepSeek** (decisión del 17-oct-2026). API compatible con Anthropic Messages en `https://api.deepseek.com/anthropic`, modelo `deepseek-flash` (= DeepSeek-V4.1-Flash-1017, verificado con `GET /models`). Verificado: con `thinking: {type: "disabled"}` y `tool_choice` forzado a una herramienta, devuelve el JSON del esquema en ~1,1 s; con thinking activado, el `tool_choice` forzado se rechaza (400). Ignora `cache_control`. Clave en `DEEPSEEK_API_KEY` (solo servidor).
 
 ### 4.2 Arquitectura
 
-- **API propia `vibralook-api`** (NestJS + TypeScript, pnpm): repositorio Git **independiente**, en la carpeta `./vibralook-api` (ignorada por el repo de la app). Despliegue `pnpm install && pnpm build && pnpm start`. La API Key de YouCam vive **solo** en el servidor.
+- **API propia `vibralook-api`** (NestJS + TypeScript, pnpm): repositorio Git **independiente** (https://github.com/shamuel22/vibra-look-api), en la carpeta `./vibralook-api` (ignorada por el repo de la app). Despliegue `pnpm install && pnpm build && pnpm start`. La API Key de YouCam vive **solo** en el servidor.
 - **Sin base de datos al inicio**: las sesiones duran minutos y el brief pide no conservar imágenes; estado en memoria con TTL. PostgreSQL se añade solo si hace falta (registro de unidades o límites entre reinicios).
-- **Motor de traducción**: LLM (Claude) → JSON estricto → validación con esquema → un reintento → receta editorial prediseñada **etiquetada** como tal.
+- **Motor de traducción**: LLM (DeepSeek `deepseek-flash`, formato Anthropic) → JSON estricto (herramienta forzada) → validación con esquema → un reintento → receta editorial prediseñada **etiquetada** como tal.
 - **Compilador de looks determinista**: `LookRecipe` → efectos YouCam de la lista blanca. Las restricciones se validan **antes** de gastar unidades.
 - **Privacidad**: la selfie se sube a YouCam por la API (subida privada); los resultados se descargan y se sirven a la app por la propia API con el token de sesión; al cerrar o expirar la sesión se borran las tareas en YouCam y la memoria.
 
@@ -192,8 +196,8 @@ Hecho con llamadas reales; costó 3 unidades (saldo 1.040 → 1.037). Imagen: mu
 | Etapa | Contenido | Criterio de salida |
 | --- | --- | --- |
 | F2.0 Spike | ✅ Hecho (arriba). | — |
-| F2.1 Esqueleto API | NestJS, config validada (.env), `/health`, cliente YouCam (archivo, tarea, sondeo, borrado, saldo) con errores normalizados, logs sin datos personales. | Tests del cliente + 1 render real desde la API. |
-| F2.2 Contratos + compilador | Contratos compartidos con la app (receta, kit, restricciones, tonos) + compilador a efectos YouCam + validador de restricciones. | Tests: cada receta válida compila; ninguna inválida llega a YouCam. |
+| F2.1 Esqueleto API | ✅ Hecho. NestJS, config validada (.env), `/health`, cliente YouCam (archivo, tarea, sondeo, borrado, saldo) con errores normalizados, logs sin datos personales. | Tests del cliente + 1 render real desde la API. |
+| F2.2 Contratos + compilador | ✅ Hecho. Contratos compartidos con la app (receta, kit, restricciones, tonos) + compilador a efectos YouCam + validador de restricciones. | Tests: cada receta válida compila; ninguna inválida llega a YouCam. |
 | F2.3 Traducción | Cliente LLM, prompt, esquema, reintento, recetas editoriales de respaldo ES/EN, `describe` para ediciones. | Tests con las 3 vibras de ejemplo; JSON siempre válido o respaldo etiquetado. |
 | F2.4 Orquestación | Endpoints de sesión: crear, subir selfie (validación + errores de rostro), traducir, renders por variante/edición, estado, imagen, cerrar. Caché selfie+receta, límites por sesión. | Recorrido completo por HTTP con renders reales. |
 | F2.5 App | Implementación HTTP de `src/services/` (la UI no cambia), `EXPO_PUBLIC_API_URL`, mock conservado para desarrollo. Sello de simulación desaparece con resultados reales. | Recorrido completo en el emulador con YouCam real. |
@@ -264,3 +268,5 @@ codex exec -C /home/lu/vibralook -s workspace-write \
 | 2026-10-17 | Integración de artes v01 | ✅ | Paquete `VIBRA_LOOK_ARTES_v01` (A0–A8) revisado contra los criterios de aceptación: dimensiones, pesos, transparencia de A4/A8, sin texto, marcas ni personas. WebP en `assets/art/` + `ART_REGISTRY` (marco idéntico al placeholder); A4 con `contain`; A8 sustituye las bandas de `RibbonAccent` (misma deriva/pausas). Héroe de bienvenida a sangre completa. Carpeta de entrega excluida de tsc/eslint y versionada como respaldo. Nota: las piezas declaran haber sido generadas con IA (`prompts.md`); confirmar compatibilidad con las reglas del concurso. |
 | 2026-10-17 | Correcciones de UI | ✅ | Héroe de bienvenida con el GIF `vl_onboarding_hero_comparacion_v03` (autoplay solo con movimiento permitido + rótulo «Imagen ilustrativa»). `ButtonRow`: el secundario usa su ancho natural, así «Repetir» y «Omitir por ahora» ya no se parten a mitad de palabra; el principal ocupa el resto. Verificado en español en el emulador. |
 | 2026-10-17 | Botones responsive | ✅ | `ButtonRow` decide por medición: mide el ancho natural de ambos botones (copias invisibles) y los pone en fila solo si caben completos; si no, los apila (principal arriba). Sin umbrales fijos; vale para cualquier ancho, idioma y tamaño de letra. Verificado en español a 411, 375 y 360 dp. Rótulo «Imagen ilustrativa» reducido a letra fina. |
+| 2026-10-17 | F2.1 — Esqueleto API | ✅ | `vibralook-api` (NestJS 12, pnpm): config validada, `/health`, cliente YouCam con errores normalizados, smoke real. Repo propio `shamuel22/vibra-look-api`. |
+| 2026-10-17 | F2.2 — Contratos + compilador | ✅ | Copia generada del dominio de la app (`pnpm contracts:sync`, el test falla si se desincroniza) + esquemas zod con paridad de tipos en compilación. Validador (forma, biblioteca de tonos, acabado por zona, restricciones y kit con las reglas de la app, id) y compilador determinista con puerta de lista blanca; el cliente YouCam solo acepta efectos compilados. 19 tests (barrido exhaustivo: toda receta válida compila, ninguna inválida pasa). Probado con YouCam real en la muestra y en la foto del equipo; `2colors1` retirado. Proveedor de traducción: DeepSeek. Carpeta `VIBRA_LOOK_ARTES_v01/` retirada (sigue en el historial); el tsconfig/eslint de la app ahora excluyen `vibralook-api`. |

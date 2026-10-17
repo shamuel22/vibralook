@@ -19,6 +19,6 @@
   ],
   "exclude": [
     "node_modules",
-    "VIBRA_LOOK_ARTES_v01"
+    "vibralook-api"
   ]
 }

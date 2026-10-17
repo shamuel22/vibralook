@@ -34,3 +34,6 @@ yarn-error.*
 
 # Independent API repository (own git)
 /vibralook-api/
+
+# Personal test photos (never commit)
+/assets/equipo*.jpg
