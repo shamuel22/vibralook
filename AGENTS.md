@@ -3,9 +3,6 @@
 Read before writing any code in this repo. Applies to every agent (Claude, Codex) and human contributor.
 
 ## Sources of truth (in order)
-1. `BRIEF_VIBRA_CONCURSO_YOUCAM_2026.md` — product behaviour.
-2. `DESIGN.md` — visual system, copy tone, motion, accessibility.
-3. `PLAN.md` — stages, ownership, decisions already taken (§2 overrides parts of the boards and adapts DESIGN.md to native mobile).
 
 **Mobile only.** Expo SDK 58 app for iOS and Android. No web target, no web-only APIs, no CSS.
 
