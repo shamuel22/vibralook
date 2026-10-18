@@ -66,7 +66,7 @@ npm run lint
 npx expo-doctor
 ```
 
-Project map, rules and stages: [`AGENTS.md`](AGENTS.md), [`PLAN.md`](PLAN.md), visual system [`DESIGN.md`](DESIGN.md), product brief [`BRIEF_VIBRA_CONCURSO_YOUCAM_2026.md`](BRIEF_VIBRA_CONCURSO_YOUCAM_2026.md) (Spanish).
+Project map, rules and stages: [`AGENTS.md`](AGENTS.md),...
 
 ```
 src/app/         screens (Expo Router)
